@@ -99,7 +99,7 @@ const prevStep = () => { if (step.value > 1) step.value-- }
         <div class="left-panel">
             <div class="left-content">
                 <div class="brand">
-                    <span class="brand-icon">K</span>
+                    <span class="brand-icon">F</span>
                     <span class="brand-name">Fundi<em>Link</em></span>
                 </div>
                 <h1 class="panel-title">SEARCH.<br>FIND.<br><em>GET SERVICE.</em></h1>

@@ -100,13 +100,12 @@ onMounted(() => {
             individuals can <strong>access top-notch services and achieve their goals.</strong>
           </p>
           <p class="about-body">
-            Our state-of-the-art facilities, expert servicemen, and supportive community
-            create an environment where you can grow. Whether you're a beginner or a
-            seasoned professional, we have everything you need to succeed.
+            Our expert servicemen are vetted and groomed to
+            create an environment where you can be assured of quality service delivery.
           </p>
           <p class="about-body">
-            We offer a wide range of services, personalized sessions, and
-            cutting-edge equipment to cater to all needs and preferences.
+            We offer a wide range of services, with 24/7 access to our site.
+            Services are rendered as quickly as possible with little to no delay.
           </p>
 
           <div class="about-features">
@@ -449,7 +448,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid rgba(200,255,0,0.35);
+  border: 1px solid rgba(0, 30, 255, 0.272);
   color: rgba(240,237,230,0.8);
   font-size: 0.8rem;
   font-weight: 600;
