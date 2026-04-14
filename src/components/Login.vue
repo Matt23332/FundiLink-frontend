@@ -48,21 +48,21 @@ const handleLogin = async () => {
         <div class="left-panel">
             <div class="left-content">
                 <div class="brand">
-                    <span class="brand-icon">M</span>
-                    <span class="brand-name">Mac<em>Fit</em></span>
+                    <span class="brand-icon">K</span>
+                    <span class="brand-name">Fundi<em>Link</em></span>
                 </div>
-                <h1 class="panel-title">TRAIN.<br>PUSH.<br><em>CONQUER.</em></h1>
-                <p class="panel-sub">Your fitness journey continues here. Login and get back to work.</p>
+                <h1 class="panel-title">SEARCH.<br>FIND.<br><em>GET SERVICE.</em></h1>
+                <p class="panel-sub">Your services journey continues here. Login and get back to work.</p>
 
                 <div class="panel-stats">
                     <div class="pstat">
-                        <span class="pstat-num">5K</span>
-                        <span class="pstat-label">Members</span>
+                        <span class="pstat-num">1K</span>
+                        <span class="pstat-label">Users</span>
                     </div>
                     <div class="pstat-divider"></div>
                     <div class="pstat">
                         <span class="pstat-num">20</span>
-                        <span class="pstat-label">Classes/Week</span>
+                        <span class="pstat-label">Services</span>
                     </div>
                     <div class="pstat-divider"></div>
                     <div class="pstat">
@@ -80,8 +80,8 @@ const handleLogin = async () => {
         <div class="right-panel">
             <div class="form-card">
                 <div class="form-header">
-                    <div class="form-eyebrow">MEMBER LOGIN</div>
-                    <h2 class="form-title">SIGN INTO<br><em>MacFit</em></h2>
+                    <div class="form-eyebrow">LOGIN FORM</div>
+                    <h2 class="form-title">SIGN INTO<br><em>FundiLink</em></h2>
                     <div class="form-bar"></div>
                 </div>
 
@@ -158,52 +158,66 @@ const handleLogin = async () => {
 
 <style scoped>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
+/* ── Navy blue palette ── */
+/* --navy-darkest : #060d1a  (page background)          */
+/* --navy-dark    : #091222  (left panel background)    */
+/* --navy-mid     : #0d1a2e  (right panel background)   */
+/* --navy-input   : #0a1628  (input background)         */
+/* --accent       : #4d8ef0  (primary accent — sky blue)*/
+/* --accent-hover : #6aa3f5                             */
+ 
 .login-page {
     font-family: 'Barlow', sans-serif;
     min-height: 100vh;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    background: #0a0a0a;
+    background: #060d1a;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
 }
-
+ 
 @media (max-width: 860px) {
     .login-page { grid-template-columns: 1fr; }
     .left-panel { display: none; }
 }
-
+ 
+/* ── LEFT PANEL ── */
 .left-panel {
     position: relative;
-    background: #0d0d0d;
-    border-right: 1px solid rgba(200, 255, 0, 0.1);
+    background: #091222;
+    border-right: 1px solid rgba(77, 142, 240, 0.15);
     overflow: hidden;
     display: flex;
     align-items: center;
     padding: 4rem;
 }
-
+ 
 .left-content { position: relative; z-index: 2; }
-
+ 
 .brand {
     display: flex;
     align-items: center;
     gap: 0.7rem;
     margin-bottom: 4rem;
 }
-
+ 
 .brand-icon {
     display: grid;
     place-items: center;
     width: 36px;
     height: 36px;
-    background: #c8ff00;
-    color: #0a0a0a;
+    background: #4d8ef0;
+    color: #060d1a;
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 900;
     font-size: 1.1rem;
     clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
 }
-
+ 
 .brand-name {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 1.4rem;
@@ -212,9 +226,9 @@ const handleLogin = async () => {
     color: #f0ede6;
     text-transform: uppercase;
 }
-
-.brand-name em { color: #c8ff00; font-style: italic; }
-
+ 
+.brand-name em { color: #4d8ef0; font-style: italic; }
+ 
 .panel-title {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: clamp(3.5rem, 5.5vw, 5.5rem);
@@ -224,9 +238,9 @@ const handleLogin = async () => {
     color: #f0ede6;
     margin-bottom: 1.5rem;
 }
-
-.panel-title em { font-style: italic; color: #c8ff00; }
-
+ 
+.panel-title em { font-style: italic; color: #4d8ef0; }
+ 
 .panel-sub {
     font-size: 0.95rem;
     font-weight: 300;
@@ -235,23 +249,23 @@ const handleLogin = async () => {
     max-width: 320px;
     margin-bottom: 3rem;
 }
-
+ 
 .panel-stats {
     display: flex;
     align-items: center;
     gap: 1.5rem;
 }
-
+ 
 .pstat { display: flex; flex-direction: column; gap: 0.15rem; }
-
+ 
 .pstat-num {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 1.8rem;
     font-weight: 900;
-    color: #c8ff00;
+    color: #4d8ef0;
     line-height: 1;
 }
-
+ 
 .pstat-label {
     font-size: 0.65rem;
     font-weight: 600;
@@ -259,63 +273,64 @@ const handleLogin = async () => {
     color: rgba(240, 237, 230, 0.5);
     text-transform: uppercase;
 }
-
+ 
 .pstat-divider {
     width: 1px;
     height: 36px;
     background: rgba(240, 237, 230, 0.1);
 }
-
+ 
+/* Decorative lines */
 .deco-lines {
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
 }
-
+ 
 .deco-line {
     position: absolute;
     width: 1px;
     bottom: -10%;
     height: 55%;
-    background: linear-gradient(to top, rgba(200, 255, 0, 0.12), transparent);
+    background: linear-gradient(to top, rgba(77, 142, 240, 0.2), transparent);
     animation: riseLine 4s ease-in-out infinite alternate;
 }
-
+ 
 .deco-line:nth-child(1) { left: 12%; height: 40%; }
 .deco-line:nth-child(2) { left: 28%; height: 60%; }
 .deco-line:nth-child(3) { left: 45%; height: 35%; }
 .deco-line:nth-child(4) { left: 62%; height: 55%; }
 .deco-line:nth-child(5) { left: 78%; height: 45%; }
 .deco-line:nth-child(6) { left: 92%; height: 65%; }
-
+ 
 @keyframes riseLine {
-  0%   { transform: translateY(0); opacity: 0.4; }
-  100% { transform: translateY(-40px); opacity: 1; }
+    0%   { transform: translateY(0); opacity: 0.4; }
+    100% { transform: translateY(-40px); opacity: 1; }
 }
-
-/* Right Panel */
+ 
+/* ── RIGHT PANEL ── */
 .right-panel {
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 3rem 2rem;
-    background: #0a0a0a;
+    background: #0d1a2e;
 }
-
+ 
 .form-card {
     width: 100%;
     max-width: 440px;
 }
-
+ 
 .form-eyebrow {
     font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.3em;
-    color: #c8ff00;
+    color: #4d8ef0;
     margin-bottom: 0.75rem;
 }
-
+ 
 .form-title {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 3.2rem;
@@ -325,20 +340,20 @@ const handleLogin = async () => {
     color: #f0ede6;
     margin-bottom: 1rem;
 }
-
-.form-title em { font-style: italic; color: #c8ff00; }
-
+ 
+.form-title em { font-style: italic; color: #4d8ef0; }
+ 
 .form-bar {
     width: 40px;
     height: 3px;
-    background: #c8ff00;
+    background: #4d8ef0;
     margin-bottom: 2.5rem;
 }
-
-/* Fields */
+ 
+/* ── FIELDS ── */
 .form-body { display: flex; flex-direction: column; gap: 1.2rem; }
 .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
-
+ 
 .field-label {
     font-size: 0.62rem;
     font-weight: 700;
@@ -346,28 +361,28 @@ const handleLogin = async () => {
     color: rgba(240, 237, 230, 0.45);
     text-transform: uppercase;
 }
-
+ 
 .field-wrap {
     position: relative;
     display: flex;
     align-items: center;
-    background: #111;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #0a1628;
+    border: 1px solid rgba(77, 142, 240, 0.15);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
+ 
 .field-wrap:focus-within {
-    border-color: #c8ff00;
-    box-shadow: 0 0 0 3px rgba(200, 255, 0, 0.08);
+    border-color: #4d8ef0;
+    box-shadow: 0 0 0 3px rgba(77, 142, 240, 0.12);
 }
-
+ 
 .field-icon {
     color: rgba(240, 237, 230, 0.25);
     font-size: 1.1rem !important;
     padding: 0 0.75rem;
     flex-shrink: 0;
 }
-
+ 
 .field-input {
     flex: 1;
     background: transparent;
@@ -378,9 +393,9 @@ const handleLogin = async () => {
     font-family: 'Barlow', sans-serif;
     font-size: 0.95rem;
 }
-
+ 
 .field-input::placeholder { color: rgba(240, 237, 230, 0.2); }
-
+ 
 .field-toggle {
     background: none;
     border: none;
@@ -391,16 +406,43 @@ const handleLogin = async () => {
     align-items: center;
     transition: color 0.2s;
 }
-
+ 
 .field-toggle:hover { color: rgba(240, 237, 230, 0.7); }
-
+ 
+/* ── META ROW ── */
 .form-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: -0.2rem;
 }
-
+ 
+.remember-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(240, 237, 230, 0.45);
+    cursor: pointer;
+}
+ 
+.remember-check {
+    accent-color: #4d8ef0;
+    width: 16px;
+    height: 16px;
+}
+ 
+.forgot-link {
+    font-size: 0.82rem;
+    color: #4d8ef0;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+ 
+.forgot-link:hover { opacity: 0.75; }
+ 
+/* ── ERROR ── */
 .error-banner {
     display: flex;
     align-items: center;
@@ -411,44 +453,20 @@ const handleLogin = async () => {
     padding: 0.75rem 1rem;
     font-size: 0.82rem;
 }
-
+ 
 .error-icon {
     color: #ff6060 !important;
     font-size: 1.1rem !important;
     flex-shrink: 0;
 }
-
-.remember-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    color: rgba(240, 237, 230, 0.45);
-    cursor: pointer;
-}
-
-.remember-check {
-    accent-color: #c8ff00;
-    width: 16px;
-    height: 16px;
-}
-
-.forgot-link {
-    font-size: 0.82rem;
-    color: #c8ff00;
-    text-decoration: none;
-    font-weight: 500;
-    transition: opacity 0.2s;
-}
-
-.forgot-link:hover { opacity: 0.75; }
-
+ 
+/* ── SUBMIT ── */
 .submit-btn {
     width: 100%;
     padding: 1rem;
-    background: #c8ff00;
+    background: #4d8ef0;
     border: none;
-    color: #0a0a0a;
+    color: #ffffff;
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 1rem;
     font-weight: 700;
@@ -463,58 +481,61 @@ const handleLogin = async () => {
     min-height: 52px;
     margin-top: 0.4rem;
 }
-
-.submit-btn:hover { background: #d9ff33; transform: translateY(-1px); }
+ 
+.submit-btn:hover { background: #6aa3f5; transform: translateY(-1px); }
 .submit-btn--loading { opacity: 0.8; cursor: wait; }
 .submit-arrow { transition: transform 0.2s; }
 .submit-btn:hover .submit-arrow { transform: translateX(4px); }
-
+ 
+/* ── LOADING DOTS ── */
 .loading-dots {
     display: flex;
     gap: 5px;
     align-items: center;
 }
-
+ 
 .loading-dots span {
     width: 6px;
     height: 6px;
-    background: #0a0a0a;
+    background: #ffffff;
     border-radius: 50%;
     animation: dotBounce 0.9s ease-in-out infinite;
 }
-
+ 
 .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
 .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+ 
 @keyframes dotBounce {
     0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
     40% { transform: scale(1.2); opacity: 1; }
 }
-
-/* Divider */
+ 
+/* ── DIVIDER ── */
 .form-divider {
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
-
+ 
 .divider-line {
     flex: 1;
     height: 1px;
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(77, 142, 240, 0.1);
 }
-
+ 
 .divider-text {
     font-size: 0.65rem;
     font-weight: 700;
     letter-spacing: 0.2em;
     color: rgba(240, 237, 230, 0.3);
 }
-
+ 
+/* ── GOOGLE BTN ── */
 .google-btn {
     width: 100%;
     padding: 0.85rem 1rem;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(77, 142, 240, 0.2);
     color: rgba(240, 237, 230, 0.75);
     font-family: 'Barlow', sans-serif;
     font-size: 0.9rem;
@@ -526,26 +547,27 @@ const handleLogin = async () => {
     gap: 0.75rem;
     transition: border-color 0.2s ease, background 0.2s ease;
 }
-
+ 
 .google-btn:hover {
-    border-color: rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(77, 142, 240, 0.45);
+    background: rgba(77, 142, 240, 0.05);
 }
-
+ 
+/* ── FOOTER ── */
 .form-footer {
     margin-top: 2rem;
     text-align: center;
     font-size: 0.88rem;
     color: rgba(240, 237, 230, 0.4);
 }
-
+ 
 .signup-link {
-    color: #c8ff00;
+    color: #4d8ef0;
     text-decoration: none;
     font-weight: 600;
     margin-left: 0.3rem;
     transition: opacity 0.2s;
 }
-
+ 
 .signup-link:hover { opacity: 0.75; }
 </style>

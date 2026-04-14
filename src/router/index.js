@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth';
 import Admin from '@/components/Admin.vue'
-import Bundles from '@/components/Bundles.vue'
-import GymLocations from '@/components/GymLocations.vue'
+import Services from '@/components/Services.vue'
+import ServiceRequests from '@/components/ServiceRequest.vue'
 import HomePage from '@/components/HomePage.vue'
 import LandingPage from '@/components/LandingPage.vue'
 import Login from '@/components/Login.vue'
@@ -13,13 +13,13 @@ const routes = [
   // Public routes
   { path: '/', name: 'LandingPage', component: LandingPage },
   { path: '/login', name: 'Login', component: Login },
-  { path: '/signup', name: 'SignUp', component: SignUp },
+  { path: '/signUp', name: 'SignUp', component: SignUp },
 
   // Protected routes
   { path: '/profile', name: 'Profile', component: Profile },
   { path: '/homePage', name: 'HomePage', component: HomePage },
-  { path: '/bundles', name: 'Bundles', component: Bundles },
-  { path: '/gymLocations', name: 'GymLocations', component: GymLocations },
+  { path: '/serviceRequests', name: 'ServiceRequests', component: ServiceRequests },
+  { path: '/services', name: 'Services', component: Services },
   
   // Admin route
   { path: '/admin', name: 'Admin', component: Admin },

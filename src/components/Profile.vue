@@ -3,7 +3,7 @@ const userDetails = JSON.parse(localStorage.getItem('userDetails'))
 </script>
 
 <template>
-    <v-container width="50%" style="background-color:#" class="">
+    <v-container width="50%" style="background-color:#091222" class="">
         <v-row>
             <v-col>
                 <v-card>

@@ -15,7 +15,6 @@ const form = ref({
     phone: '',
     gender: '',
     dob: '',
-    gymLocation: '',
     password: '',
     confirmPassword: '',
 });
@@ -26,10 +25,9 @@ const loading = ref(false);
 const agreed = ref(false);
 
 const genders = ['Male', 'Female', 'Prefer not to say', 'Other'];
-const locations = ['Westlands', 'Karen', 'Kilimani', 'CBD', 'Thika Road', 'Mombasa Road'];
 const step = ref(1);
-const totalSteps = 3;
-const stepLabels = ['Personal Info', 'Gym Setup', 'Security'];
+const totalSteps = 2;
+const stepLabels = ['Personal Info', 'Security'];
 const passwordStrength = computed(() => {
     const p = form.value.password;
     if (!p) return 0;
@@ -47,7 +45,7 @@ const strengthLabel = computed(() => {
 })
 
 const strengthColor = computed(() => {
-    const colors = ['', '#ff4444', '#ffaa00', '#88cc00', '#c8ff00']
+    const colors = ['', '#ff4444', '#ffaa00', '#88cc00', '#4d8ef0']
     return colors[passwordStrength.value];
 })
 
@@ -69,7 +67,6 @@ const handleSubmit = async () => {
       payload.append('confirm_password', form.value.confirmPassword)
       payload.append('gender', form.value.gender)
       payload.append('dob', form.value.dob)
-      payload.append('gym_location', form.value.gymLocation)
 
       const { data } = await api.post('/register', payload)
       localStorage.setItem('token', data.token)
@@ -102,21 +99,21 @@ const prevStep = () => { if (step.value > 1) step.value-- }
         <div class="left-panel">
             <div class="left-content">
                 <div class="brand">
-                    <span class="brand-icon">M</span>
-                    <span class="brand-name">Mac<em>Fit</em></span>
+                    <span class="brand-icon">K</span>
+                    <span class="brand-name">Fundi<em>Link</em></span>
                 </div>
-                <h1 class="panel-title">TRAIN.<br>PUSH.<br><em>CONQUER.</em></h1>
-                <p class="panel-sub">Your fitness journey continues here. Sign up and begin your journey.</p>
+                <h1 class="panel-title">SEARCH.<br>FIND.<br><em>GET SERVICE.</em></h1>
+                <p class="panel-sub">Your services journey continues here. Sign up and begin your journey.</p>
 
                 <div class="panel-stats">
                     <div class="pstat">
-                        <span class="pstat-num">5K</span>
-                        <span class="pstat-label">Members</span>
+                        <span class="pstat-num">1K</span>
+                        <span class="pstat-label">Users</span>
                     </div>
                     <div class="pstat-divider"></div>
                     <div class="pstat">
                         <span class="pstat-num">20</span>
-                        <span class="pstat-label">Classes/Week</span>
+                        <span class="pstat-label">Services</span>
                     </div>
                     <div class="pstat-divider"></div>
                     <div class="pstat">
@@ -138,7 +135,7 @@ const prevStep = () => { if (step.value > 1) step.value-- }
                 <!--Header-->
                 <div class="form-header">
                     <div class="form-eyebrow">MEMBER SIGNUP</div>
-                    <h2 class="form-title">SIGN UP<br>FOR <em>MacFit</em></h2>
+                    <h2 class="form-title">SIGN UP<br>FOR <em>FundiLink</em></h2>
                     <div class="form-bar"></div>
                 </div>
 
@@ -220,46 +217,14 @@ const prevStep = () => { if (step.value > 1) step.value-- }
                                 </div>
                             </div>
 
-                            <button type="button" class="submit-btn" @click="nextStep">NEXT: GYM SETUP
+                            <button type="button" class="submit-btn" @click="nextStep">NEXT: SECURITY
                                 <span class="submit-arrow">→</span>
                             </button>
                         </div>
                     </div>
 
-                    <!--Step 2: Gym Setup-->
+                    <!--Step 2: Security-->
                     <div v-show="step === 2" class="form-step">
-                        <div class="field-group">
-                            <label class="field-label">Preferred Gym Location</label>
-                            <div class="field-wrap field-wrap--select">
-                                <v-icon icon="mdi-map-marker-outline" class="field-icon"></v-icon>
-                                <select v-model="form.gymLocation" class="field-input field-select">
-                                    <option value="" disabled>Select Location</option>
-                                    <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
-                                </select>
-                                <v-icon icon="mdi-chevron-down" class="select-caret"></v-icon>
-                            </div>
-                        </div>
-
-                        <!--Location preview cards-->
-                        <div class="location-grid">
-                            <div v-for="loc in locations" :key="loc" class="location-chip"
-                                :class="{ 'location-chip--sel': form.gymLocation === loc }"
-                                @click="form.gymLocation = loc">
-                                <v-icon icon="mdi-map-marker-outline" class="chip-coin"></v-icon>
-                                {{ loc.replace('MacFit ', '') }}
-                            </div>
-                        </div>
-
-                        <div class="step-nav">
-                            <button type="button" class="back-btn" @click="prevStep">← BACK</button>
-                            <button type="button" class="submit-btn step-next-btn" @click="nextStep">NEXT: SECURITY
-                                <span class="submit-arrow">→</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!--Step 3: Security-->
-                    <div v-show="step === 3" class="form-step">
                         <div class="field-group">
                             <label class="field-label">Password</label>
                             <div class="field-wrap">
@@ -328,21 +293,6 @@ const prevStep = () => { if (step.value > 1) step.value-- }
     </div>
 </template>
 
-<script>
-export default {
-    data() {
-        return {
-            perks: [
-                { text: 'Access to all gym locations' },
-                { text: 'Unlimited group fitness classess' },
-                { text: 'Personalised training programs' },
-                { text: 'Nutrition and recovery support' },
-            ]
-        }
-    }
-}
-</script>
-
 <style scoped>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -351,7 +301,12 @@ export default {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: #0a0a0a;
+  background: #091222;
+  width: 100vw;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
 }
 
 @media (max-width: 900px) {
@@ -362,8 +317,8 @@ export default {
 /* ── LEFT PANEL ──────────────────────────────────────────── */
 .left-panel {
   position: relative;
-  background: #0d0d0d;
-  border-right: 1px solid rgba(200,255,0,0.1);
+  background: #091222;
+  border-right: 1px solid rgba(77, 142, 240, 0.15);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -383,8 +338,8 @@ export default {
   display: grid;
   place-items: center;
   width: 36px; height: 36px;
-  background: #c8ff00;
-  color: #0a0a0a;
+  background: #4d8ef0;
+  color: #060d1a;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 900;
   font-size: 1.1rem;
@@ -399,7 +354,7 @@ export default {
   color: #f0ede6;
   text-transform: uppercase;
 }
-.brand-name em { font-style: italic; color: #c8ff00; }
+.brand-name em { font-style: italic; color: #4d8ef0; }
 
 .panel-title {
   font-family: 'Barlow Condensed', sans-serif;
@@ -410,7 +365,7 @@ export default {
   color: #f0ede6;
   margin-bottom: 1.2rem;
 }
-.panel-title em { font-style: italic; color: #c8ff00; }
+.panel-title em { font-style: italic; color: #4d8ef0; }
 
 .panel-sub {
   font-size: 0.9rem;
@@ -437,7 +392,7 @@ export default {
 }
 
 .perk-check {
-  color: #c8ff00;
+  color: #4d8ef0 !important;
   font-weight: 700;
   font-size: 0.8rem;
   flex-shrink: 0;
@@ -451,7 +406,7 @@ export default {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.8rem;
   font-weight: 900;
-  color: #c8ff00;
+  color: #4d8ef0;
   line-height: 1;
 }
 
@@ -474,7 +429,7 @@ export default {
   position: absolute;
   bottom: -10%;
   width: 1px;
-  background: linear-gradient(to top, rgba(200,255,0,0.12), transparent);
+  background: linear-gradient(to top, rgba(77, 142, 240, 0.2), transparent);
   animation: riseLine 4s ease-in-out infinite alternate;
 }
 
@@ -496,7 +451,7 @@ export default {
   align-items: center;
   justify-content: center;
   padding: 3rem 2rem;
-  background: #0a0a0a;
+  background: #0d1a2e;
   overflow-y: auto;
 }
 
@@ -519,7 +474,7 @@ export default {
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.3em;
-  color: #c8ff00;
+  color: #4d8ef0 !important;
   margin-bottom: 0.75rem;
 }
 
@@ -532,11 +487,11 @@ export default {
   color: #f0ede6;
   margin-bottom: 1rem;
 }
-.form-title em { font-style: italic; color: #c8ff00; }
+.form-title em { font-style: italic; color: #4d8ef0; }
 
 .form-bar {
   width: 40px; height: 3px;
-  background: #c8ff00;
+  background: #4d8ef0;
   margin-bottom: 2rem;
 }
 
@@ -569,15 +524,15 @@ export default {
 }
 
 .step-item--active .step-bubble {
-  background: #c8ff00;
-  border-color: #c8ff00;
-  color: #0a0a0a;
+  background: #4d8ef0;
+  border-color: #4d8ef0;
+  color: #060d1a;
 }
 
 .step-item--done .step-bubble {
-  background: rgba(200,255,0,0.15);
-  border-color: rgba(200,255,0,0.4);
-  color: #c8ff00;
+  background: rgba(77, 142, 240, 0.15);
+  border-color: rgba(77, 142, 240, 0.4);
+  color: #4d8ef0;
 }
 
 .step-label {
@@ -591,7 +546,7 @@ export default {
 }
 
 .step-item--active .step-label { color: #f0ede6; }
-.step-item--done .step-label { color: rgba(200,255,0,0.6); }
+.step-item--done .step-label { color: rgba(77, 142, 240, 0.6); }
 
 .step-connector {
   flex: 1;
@@ -631,11 +586,11 @@ export default {
 }
 
 .field-wrap:focus-within {
-  border-color: #c8ff00;
-  box-shadow: 0 0 0 3px rgba(200,255,0,0.07);
+  border-color: #4d8ef0;
+  box-shadow: 0 0 0 3px rgba(77, 142, 240, 0.07);
 }
 
-.field-wrap--match { border-color: rgba(200,255,0,0.4); }
+.field-wrap--match { border-color: rgba(77, 142, 240, 0.4); }
 .field-wrap--mismatch { border-color: rgba(255,60,60,0.5); }
 
 .field-icon {
@@ -689,7 +644,7 @@ export default {
 .field-toggle:hover { color: rgba(240,237,230,0.65); }
 
 .match-icon {
-  color: #c8ff00 !important;
+  color: #4d8ef0 !important;
   font-size: 1rem !important;
   padding-right: 0.7rem;
 }
@@ -701,6 +656,19 @@ export default {
 }
 
 /* ── PASSWORD STRENGTH ───────────────────────────────────── */
+.password-match {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+}
+
+.password-match--ok { color: #3ecf82; }
+.password-match--err { color: #ff6060; }
+.match-text { font-size: 0.75rem; }
+.match-icon { font-size: 1rem !important; }
+
 .strength-meter {
   display: flex;
   align-items: center;
@@ -731,43 +699,6 @@ export default {
   transition: color 0.3s;
 }
 
-/* ── LOCATION CHIPS ──────────────────────────────────────── */
-.location-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.location-chip {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.9rem;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: #111;
-  color: rgba(240,237,230,0.5);
-  font-size: 0.78rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.location-chip:hover {
-  border-color: rgba(200,255,0,0.3);
-  color: #f0ede6;
-}
-
-.location-chip--sel {
-  border-color: #c8ff00;
-  background: rgba(200,255,0,0.08);
-  color: #c8ff00;
-}
-
-.chip-icon {
-  font-size: 0.85rem !important;
-  color: currentColor !important;
-}
-
 /* ── TERMS ───────────────────────────────────────────────── */
 .terms-label {
   display: flex;
@@ -780,14 +711,14 @@ export default {
 }
 
 .terms-check {
-  accent-color: #c8ff00;
+  accent-color: #4d8ef0;
   width: 15px; height: 15px;
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .terms-link {
-  color: #c8ff00;
+  color: #4d8ef0;
   text-decoration: none;
   font-weight: 500;
 }
@@ -797,7 +728,7 @@ export default {
 .submit-btn {
   width: 100%;
   padding: 1rem;
-  background: #c8ff00;
+  background: #4d8ef0;
   border: none;
   color: #0a0a0a;
   font-family: 'Barlow Condensed', sans-serif;
@@ -816,7 +747,7 @@ export default {
   margin-top: 0.4rem;
 }
 
-.submit-btn:hover:not(:disabled) { background: #d9ff33; transform: translateY(-1px); }
+.submit-btn:hover:not(:disabled) { background: #4d8ef0; transform: translateY(-1px); }
 .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .submit-btn--loading { opacity: 0.8; cursor: wait; }
 
@@ -878,7 +809,7 @@ export default {
 }
 
 .login-link {
-  color: #c8ff00;
+  color: #4d8ef0;
   text-decoration: none;
   font-weight: 600;
   margin-left: 0.3rem;

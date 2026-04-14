@@ -9,7 +9,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="macfit-home">
+  <div class="fundilink-home">
 
     <!-- HERO CAROUSEL -->
     <div class="carousel-wrapper">
@@ -24,12 +24,12 @@ onMounted(() => {
         <v-carousel-item src="/carousel1.jpg" cover>
           <div class="carousel-overlay">
             <div class="hero-content" :class="{ 'hero-visible': visible }">
-              <span class="hero-eyebrow">EST. 2010 · NAIROBI</span>
-              <h1 class="hero-title">PUSH YOUR<br><em>LIMITS.</em></h1>
-              <p class="hero-sub">Where champions are built — body, mind, and soul.</p>
+              <span class="hero-eyebrow">EST. 2026 · NAIROBI</span>
+              <h1 class="hero-title">EXPLORE OUR<br><em>SERVICES.</em></h1>
+              <p class="hero-sub">Where reliability meets excellence.</p>
               <div class="hero-actions">
                 <v-btn class="btn-primary" size="x-large" rounded="0">JOIN NOW</v-btn>
-                <v-btn class="btn-ghost" size="x-large" rounded="0" variant="outlined">VIEW PLANS</v-btn>
+                <v-btn class="btn-ghost" size="x-large" rounded="0" variant="outlined">VIEW SERVICES</v-btn>
               </div>
             </div>
           </div>
@@ -37,11 +37,11 @@ onMounted(() => {
         <v-carousel-item src="/carousel2.jpg" cover>
           <div class="carousel-overlay">
             <div class="hero-content" :class="{ 'hero-visible': visible }">
-              <span class="hero-eyebrow">WORLD-CLASS FACILITIES</span>
-              <h1 class="hero-title">TRAIN<br><em>HARDER.</em></h1>
-              <p class="hero-sub">State-of-the-art equipment, zero excuses.</p>
+              <span class="hero-eyebrow">WORLD-CLASS SERVICEMEN</span>
+              <h1 class="hero-title">GET<br><em>SERVICES.</em></h1>
+              <p class="hero-sub">Connecting you with the best professionals in the industry.</p>
               <div class="hero-actions">
-                <v-btn class="btn-primary" size="x-large" rounded="0">EXPLORE GYM</v-btn>
+                <v-btn class="btn-primary" size="x-large" rounded="0">EXPLORE SERVICES</v-btn>
               </div>
             </div>
           </div>
@@ -49,11 +49,11 @@ onMounted(() => {
         <v-carousel-item src="/carousel3.jpg" cover>
           <div class="carousel-overlay">
             <div class="hero-content" :class="{ 'hero-visible': visible }">
-              <span class="hero-eyebrow">EXPERT COACHES</span>
-              <h1 class="hero-title">BECOME<br><em>UNSTOPPABLE.</em></h1>
-              <p class="hero-sub">Personalized programs crafted for your success.</p>
+              <span class="hero-eyebrow">SERVICES RENDERED</span>
+              <h1 class="hero-title">TRUST<br><em>THE WORK.</em></h1>
+              <p class="hero-sub">Personalized programs crafted for your liking.</p>
               <div class="hero-actions">
-                <v-btn class="btn-primary" size="x-large" rounded="0">MEET COACHES</v-btn>
+                <v-btn class="btn-primary" size="x-large" rounded="0">MEET SERVICEMEN</v-btn>
               </div>
             </div>
           </div>
@@ -91,22 +91,22 @@ onMounted(() => {
 
         <div class="about-text-side">
           <div class="section-tag">WHO WE ARE</div>
-          <h2 class="about-title">ABOUT<br><em>MACFIT</em></h2>
+          <h2 class="about-title">ABOUT<br><em>FUNDILINK</em></h2>
           <div class="title-underline"></div>
 
           <p class="about-body">
-            At MacFit, we are dedicated to helping you achieve your fitness goals.
-            Our mission is to provide a welcoming and inclusive environment where
-            individuals of all fitness levels can <strong>thrive and reach their full potential.</strong>
+            At FundiLink, we are dedicated to connecting you with the best servicemen in the industry.
+            Our mission is to provide a reliable and professional environment where
+            individuals can <strong>access top-notch services and achieve their goals.</strong>
           </p>
           <p class="about-body">
-            Our state-of-the-art facilities, expert trainers, and supportive community
+            Our state-of-the-art facilities, expert servicemen, and supportive community
             create an environment where you can grow. Whether you're a beginner or a
-            seasoned athlete, we have everything you need to succeed.
+            seasoned professional, we have everything you need to succeed.
           </p>
           <p class="about-body">
-            We offer a wide range of classes, personalized training sessions, and
-            cutting-edge equipment to cater to all fitness levels and preferences.
+            We offer a wide range of services, personalized sessions, and
+            cutting-edge equipment to cater to all needs and preferences.
           </p>
 
           <div class="about-features">
@@ -129,11 +129,11 @@ export default {
     return {
       stats: [
         { number: '5K+', label: 'ACTIVE MEMBERS' },
-        { number: '80+', label: 'WEEKLY CLASSES' },
-        { number: '30+', label: 'EXPERT TRAINERS' },
+        { number: '80+', label: 'WEEKLY SERVICES' },
+        { number: '30+', label: 'EXPERT SERVICEMEN' },
         { number: '99%', label: 'SATISFACTION RATE' },
       ],
-      features: ['Expert Trainers', 'Modern Equipment', 'Flexible Plans', 'Group Classes'],
+      features: ['Expert Servicemen', 'Flexible Plans', 'Group Services', '24/7 Support'],
     }
   }
 }
@@ -144,10 +144,10 @@ export default {
 
 * { box-sizing: border-box; }
 
-.macfit-home {
+.fundilink-home {
   font-family: 'Barlow', sans-serif;
-  background: #0a0a0a;
-  color: #f0ede6;
+  background: #091222;
+  color: #498ef0;
   overflow-x: hidden;
 }
 
@@ -192,7 +192,7 @@ export default {
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.25em;
-  color: #c8ff00;
+  color: #498ef0;
   margin-bottom: 1rem;
   text-transform: uppercase;
 }
@@ -209,7 +209,7 @@ export default {
 
 .hero-title em {
   font-style: italic;
-  color: #c8ff00;
+  color: #498ef0;
 }
 
 .hero-sub {
@@ -228,7 +228,7 @@ export default {
 }
 
 .btn-primary {
-  background: #c8ff00 !important;
+  background: #498ef0 !important;
   color: #0a0a0a !important;
   font-family: 'Barlow Condensed', sans-serif !important;
   font-weight: 700 !important;
@@ -276,7 +276,7 @@ export default {
 
 /* ─── STATS STRIP ───────────────────────────────────────── */
 .stats-strip {
-  background: #c8ff00;
+  background: #498ef0;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -359,14 +359,14 @@ export default {
   left: 0;
   right: 0;
   height: 5px;
-  background: #c8ff00;
+  background: #498ef0;
 }
 
 .floating-badge {
   position: absolute;
   top: -1.5rem;
   right: -1.5rem;
-  background: #c8ff00;
+  background: #498ef0;
   color: #0a0a0a;
   padding: 1.2rem 1.5rem;
   text-align: center;
@@ -399,7 +399,7 @@ export default {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.28em;
-  color: #c8ff00;
+  color: #498ef0;
   text-transform: uppercase;
   margin-bottom: 1rem;
 }
@@ -416,13 +416,13 @@ export default {
 
 .about-title em {
   font-style: italic;
-  color: #c8ff00;
+  color: #498ef0;
 }
 
 .title-underline {
   width: 60px;
   height: 4px;
-  background: #c8ff00;
+  background: #498ef0;
   margin-bottom: 2rem;
 }
 
@@ -461,13 +461,13 @@ export default {
 .pill-dot {
   width: 6px;
   height: 6px;
-  background: #c8ff00;
+  background: #498ef0;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .btn-dark {
-  background: #c8ff00 !important;
+  background: #498ef0 !important;
   color: #0a0a0a !important;
   font-family: 'Barlow Condensed', sans-serif !important;
   font-weight: 700 !important;
