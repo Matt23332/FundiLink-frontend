@@ -27,7 +27,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll));
         <template v-if="auth.isLoggedIn">
             <v-btn to="/homePage">Home</v-btn>
             <v-btn to="/services">Services</v-btn>
-            <v-btn to="/serviceRequests">Service Requests</v-btn>
+            <v-btn to="/service-requests">Service Requests</v-btn>
             <v-btn v-if="auth.user?.role?.name == 'admin'" to="/admin">Admin</v-btn>
             <v-btn icon="mdi-account">
                 <v-icon>mdi-account</v-icon>

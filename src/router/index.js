@@ -18,7 +18,7 @@ const routes = [
   // Protected routes
   { path: '/profile', name: 'Profile', component: Profile },
   { path: '/homePage', name: 'HomePage', component: HomePage },
-  { path: '/serviceRequests', name: 'ServiceRequests', component: ServiceRequests },
+  { path: '/service-requests', name: 'ServiceRequests', component: ServiceRequests },
   { path: '/services', name: 'Services', component: Services },
   
   // Admin route
