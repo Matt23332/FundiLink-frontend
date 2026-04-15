@@ -80,7 +80,7 @@ onMounted(() => {
       <div class="about-grid">
         <div class="about-image-side">
           <div class="image-frame">
-            <v-img src="/fitness4.jpg" cover height="100%" class="about-img"></v-img>
+            <v-img src="/image4.jpg" cover height="100%" class="about-img"></v-img>
             <div class="image-accent-bar"></div>
           </div>
           <div class="floating-badge">
