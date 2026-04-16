@@ -26,7 +26,8 @@ const STATUS_TO_STEP = {
     active: 2,
     in_progress: 2,
     completed: 3,
-    cancelled: 0
+    cancelled: -1,
+    default: 0
 };
 
 const fetchRequests = async () => {
@@ -34,7 +35,24 @@ const fetchRequests = async () => {
     try {
         const { data } = await api.get('/service-requests');
         console.log('Fetched requests: ', data);
-        requests.value = data.requests ?? data ?? [];
+        let requestsData = [];
+
+        if (data) {
+          if (Array.isArray(data)) {
+            requestsData = data;
+          } else if (data.service_requests && Array.isArray(data.service_requests)) {
+            requestsData = data.service_requests;
+          } else if (data.data && Array.isArray(data.data)) {
+            requestsData = data.data;
+          } else if (data.requests && Array.isArray(data.requests)) {
+            requestsData = data.requests;
+          } else {
+            console.warn('Unexpected response structure: ', data);
+            requestsData = [];
+          }
+        }
+        requests.value = requestsData;
+        console.log('Processed requests: ', requests.value.length, 'requests found');
     } catch (error) {
         console.error('Error fetching requests: ', error.response?.status, error.response?.data);
     } finally {
@@ -42,23 +60,28 @@ const fetchRequests = async () => {
     }
 }
 
-const stats = computed(() => ({
-    total: requests.value.length,
-    pending: requests.value.filter(r => r.status === 'pending').length,
-    reviewing: requests.value.filter(r => r.status === 'reviewing').length,
-    active: requests.value.filter(r => r.status === 'active').length,
-    in_progress: requests.value.filter(r => r.status === 'in_progress').length,
-    completed: requests.value.filter(r => r.status === 'completed').length,
-    cancelled: requests.value.filter(r => r.status === 'cancelled').length,
-}));
+const stats = computed(() => {
+  const requestsArray = Array.isArray(requests.value) ? requests.value : [];
+  return {
+    total: requestsArray.length,
+    pending: requestsArray.filter(r => r.status === 'pending').length,
+    reviewing: requestsArray.filter(r => r.status === 'reviewing').length,
+    active: requestsArray.filter(r => r.status === 'active').length,
+    in_progress: requestsArray.filter(r => r.status === 'in_progress').length,
+    completed: requestsArray.filter(r => r.status === 'completed').length,
+    cancelled: requestsArray.filter(r => r.status === 'cancelled').length,
+  };
+});
 
 const filteredRequests = computed(() => {
-    return requests.value.filter(r => {
+    const requestsArray = Array.isArray(requests.value) ? requests.value : [];
+    return requestsArray.filter(r => {
         const matchFilter = activeFilter.value === 'all' || r.status === activeFilter.value;
-        const matchSearch = (r.service?.name ?? r.service ?? '').toLowerCase().includes(search.value.toLowerCase());
+        const serviceName = r.service?.name ?? r.service ?? '';
+        const matchSearch = serviceName.toLowerCase().includes(search.value.toLowerCase());
         return matchFilter && matchSearch;
-    })
-})
+    });
+});
 
 const openDetail = (request) => { selectedRequest.value = request; detailModal.value = true; }
 const openCancel = (request) => { selectedRequest.value = request; cancelModal.value = true; }
@@ -67,11 +90,19 @@ const openDelete = (request) => { selectedRequest.value = request; deleteModal.v
 const confirmCancel = async () => {
     actionLoadingId.value = selectedRequest.value.id
     try {
-        await api.post(`/service-requests/${selectedRequest.value.id}/cancel`);
+      let response;
+      try {
+        response = await api.patch(`/service-requests/${selectedRequest.value.id}/cancel`);
+      } catch {
+        response = await api.post(`/service-requests/${selectedRequest.value.id}/cancel`);
+      }
+      if (Array.isArray(requests.value)) {
         requests.value = requests.value.map(r => r.id === selectedRequest.value.id ? { ...r, status: 'cancelled' } : r);
-        cancelModal.value = false;
+      }
+      cancelModal.value = false;
     } catch (error) {
         console.error('Error cancelling request: ', error.response?.status, error.response?.data);
+        alert('Failed to cancel the request. Please try again later.');
     } finally {
         actionLoadingId.value = null;
     }
@@ -81,10 +112,13 @@ const confirmDelete = async () => {
     actionLoadingId.value = selectedRequest.value.id
     try {
         await api.delete(`/service-requests/${selectedRequest.value.id}`);
-        requests.value = requests.value.filter(r => r.id !== selectedRequest.value.id);
+        if (Array.isArray(requests.value)) {
+          requests.value = requests.value.filter(r => r.id !== selectedRequest.value.id);
+        }
         deleteModal.value = false;
     } catch (error) {
         console.error('Error deleting request: ', error.response?.status, error.response?.data);
+        alert('Failed to delete the request. Please try again later.');
     } finally {
         actionLoadingId.value = null;
     }
