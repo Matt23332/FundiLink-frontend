@@ -10,6 +10,24 @@ const loadingRequests = ref(true)
 const loadingIds = ref(new Set())
 const feedback = ref({}) // { [serviceId]: { type: 'success'|'error', msg: string } }
 
+const createRequest = async (formData) => {
+  const payload = {
+    service_id: formData.service_id,
+    description: formData.description,
+    price: formData.price,
+    address: formData.address,
+    // request_date: formData.request_date
+  };
+
+  try {
+    const response = await api.post('/service-requests', payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating the request', error.response?.data);
+    throw error;
+  }
+}
+
 const fetchServices = async () => {
   loading.value = true
   try {
@@ -28,13 +46,28 @@ const fetchRequests = async () => {
   try {
     const { data } = await api.get('/service-requests')
     console.log('Requests API Response: ', data); // Testing
-    userRequests.value = data.service_requests || (Array.isArray(data) ? data : []);
+
+    if (data.service_requests) {
+      userRequests.value = data.service_requests
+    } else if (data.data && Array.isArray(data.data)) {
+      userRequests.value = data.data
+    } else if (Array.isArray(data)) {
+      userRequests.value = data
+    } else {
+      userRequests.value = []
+    }
+
+    console.log('Processed requests: ', userRequests.value.length);
   } catch (err) {
     console.error('Fetch requests error: ', err.response?.status, err.response?.data);
     userRequests.value = []
   } finally {
     loadingRequests.value = false
   }
+}
+
+const fetchUserRequests = async () => {
+  await fetchRequests()
 }
 
 const filteredServices = computed(() =>
@@ -50,13 +83,14 @@ const requestService = async (serviceId) => {
   feedback.value = { ...feedback.value, [serviceId]: null }
 
   try {
+    const service = services.value.find(s => s.id === serviceId)
     const response = await api.post('/service-requests', {
       service_id: serviceId,
-      user_id: authUser?.value?.id,
       status: 'pending',
-      request_date: new Date().toISOString(),
+      request_date: new Date().toISOString().split('T')[0],
       address: '',
       description: '',
+      price: service?.price || 0,
     })
 
     feedback.value = {
@@ -122,7 +156,7 @@ const authUser = ref(null)
 
 const getCurrentUser = async () => {
   try {
-    const { data } = await api.get('/user')
+    const { data } = await api.get('/users')
     authUser.value = data
   } catch (err) {
     console.error('Error fetching current user: ', err.response?.status, err.response?.data)
@@ -240,14 +274,18 @@ onMounted(() => {
             <h2 class="section-title">MY REQUESTS</h2>
             <div class="section-bar"></div>
           </div>
-          <button 
-            v-if="!loadingRequests && userRequests.length > 0"
-            class="refresh-btn" 
-            @click="fetchUserRequests"
-            title="Refresh requests"
-          >
-            <v-icon icon="mdi-refresh" class="refresh-icon"></v-icon>
-          </button>
+
+          <div class="section-actions">
+            <button v-if="!loadingRequests && userRequests.length > 0" class="refresh-btn" @click="fetchUserRequests"
+              title="Refresh requests">
+              <v-icon icon="mdi-refresh" class="refresh-icon"></v-icon>
+            </button>
+
+            <router-link to="/request-service" class="new-request-btn">
+              <v-icon icon="mdi-plus"></v-icon>
+              New Request
+            </router-link>
+          </div>
         </div>
 
         <!-- Loading state for requests -->
@@ -744,6 +782,34 @@ onMounted(() => {
   width: 40px;
   height: 3px;
   background: #4d8ef0;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.new-request-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #4d8ef0;
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  clip-path: polygon(6% 0%, 100% 0%, 94% 100%, 0% 100%);
+  transition: all 0.2s;
+  padding: 0.65rem 1.25rem;
+}
+
+.new-request-btn:hover { background: #6aa3f5; transform: translateY(-1px); }
+.new-request-btn .v-icon {
+  font-size: 1rem !important;
 }
 
 .refresh-btn {

@@ -8,6 +8,7 @@ import LandingPage from '@/components/LandingPage.vue'
 import Login from '@/components/Login.vue'
 import Profile from '@/components/Profile.vue'
 import SignUp from '@/components/SignUp.vue'
+import RequestService from '@/components/RequestService.vue'
 
 const routes = [
   // Public routes
@@ -20,6 +21,7 @@ const routes = [
   { path: '/homePage', name: 'HomePage', component: HomePage },
   { path: '/service-requests', name: 'ServiceRequests', component: ServiceRequests },
   { path: '/services', name: 'Services', component: Services },
+  { path: '/request-service', name: 'RequestService', component: RequestService },
   
   // Admin route
   { path: '/admin', name: 'Admin', component: Admin },
