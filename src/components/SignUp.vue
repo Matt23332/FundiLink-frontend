@@ -13,8 +13,8 @@ const form = ref({
     lastName: '',
     email: '',
     phone: '',
-    gender: '',
-    dob: '',
+    role: '',
+    address: '',
     password: '',
     confirmPassword: '',
 });
@@ -24,7 +24,7 @@ const showConfirm = ref(false);
 const loading = ref(false);
 const agreed = ref(false);
 
-const genders = ['Male', 'Female', 'Prefer not to say', 'Other'];
+const roles = ['Customer', 'Provider'];
 const step = ref(1);
 const totalSteps = 2;
 const stepLabels = ['Personal Info', 'Security'];
@@ -65,8 +65,8 @@ const handleSubmit = async () => {
       payload.append('phone', form.value.phone)
       payload.append('password', form.value.password)
       payload.append('confirm_password', form.value.confirmPassword)
-      payload.append('gender', form.value.gender)
-      payload.append('dob', form.value.dob)
+      payload.append('role', form.value.role)
+      payload.append('address', form.value.address)
 
       const { data } = await api.post('/register', payload)
       localStorage.setItem('token', data.token)
@@ -196,23 +196,23 @@ const prevStep = () => { if (step.value > 1) step.value-- }
                             </div>
                             <div class="field-row">
                                 <div class="field-group">
-                                    <label class="field-label">Gender</label>
+                                    <label class="field-label">Role</label>
                                     <div class="field-wrap field-wrap--select">
-                                        <v-icon icon="mdi-gender-male-female" class="field-icon"></v-icon>
-                                        <select v-model="form.gender" class="field-input field-select">
-                                            <option value="" disabled>Select Gender</option>
-                                            <option v-for="g in genders" :key="g" :value="g">{{ g }}</option>
+                                        <v-icon icon="mdi-account-outline" class="field-icon"></v-icon>
+                                        <select v-model="form.role" class="field-input field-select">
+                                            <option value="" disabled>Select Role</option>
+                                            <option v-for="r in roles" :key="r" :value="r">{{ r }}</option>
                                         </select>
                                         <v-icon icon="mdi-chevron-down" class="select-caret"></v-icon>
                                     </div>
                                 </div>
                                 <div class="field-group">
-                                    <label class="field-label">Date of Birth</label>
+                                    <label class="field-label">Address</label>
                                     <div class="field-wrap">
-                                        <v-icon icon="mdi-calendar-outline" class="field-icon"></v-icon>
-                                        <input v-model="form.dob" type="date" class="field-input field-date"
-                                            placeholder="Date of Birth" />
-                                        <span v-if="errors.dob" class="mismatch-text">{{ errors.dob[0] }}</span>
+                                        <v-icon icon="mdi-map-marker-outline" class="field-icon"></v-icon>
+                                        <input v-model="form.address" type="text" class="field-input"
+                                            placeholder="Address" />
+                                        <span v-if="errors.address" class="mismatch-text">{{ errors.address[0] }}</span>
                                     </div>
                                 </div>
                             </div>

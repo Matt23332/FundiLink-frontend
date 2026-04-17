@@ -9,6 +9,7 @@ import Login from '@/components/Login.vue'
 import Profile from '@/components/Profile.vue'
 import SignUp from '@/components/SignUp.vue'
 import RequestService from '@/components/RequestService.vue'
+import ServiceProvider from '@/components/ServiceProvider.vue'
 
 const routes = [
   // Public routes
@@ -22,6 +23,7 @@ const routes = [
   { path: '/service-requests', name: 'ServiceRequests', component: ServiceRequests },
   { path: '/services', name: 'Services', component: Services },
   { path: '/request-service', name: 'RequestService', component: RequestService },
+  { path: '/service-provider', name: 'ServiceProvider', component: ServiceProvider },
   
   // Admin route
   { path: '/admin', name: 'Admin', component: Admin },
