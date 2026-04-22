@@ -1,255 +1,447 @@
 <script setup>
+import { ref, onMounted, computed } from 'vue';
+import api from '../services/api';
 
-import { ref, onMounted, computed } from 'vue'
-import api  from '../services/api';
+const error = ref('');
+const loading = ref(false);
+const tab = ref(1);
+const search = ref('');
 
-const token = localStorage.getItem('authToken');
-const error = ref('')
-const loading = ref(false)
-const tab = ref(null)
-const search = ref('')
+// ── DIALOG VISIBILITY ──
+const showAddUserDialog = ref(false);
+const showAddRoleDialog = ref(false);
+const showAddServiceDialog = ref(false);
+const showAddServiceRequestDialog = ref(false);
+const showEditUserDialog = ref(false);
+const showEditRoleDialog = ref(false);
+const showEditServiceDialog = ref(false);
+const showEditServiceRequestDialog = ref(false);
+const showDeleteUserDialog = ref(false);
+const showDeleteRoleDialog = ref(false);
+const showDeleteServiceDialog = ref(false);
+const showDeleteServiceRequestDialog = ref(false);
 
-const showAddUserDialog = ref(false)
-const showAddRoleDialog = ref(false)
-const showAddEquipmentDialog = ref(false)
-const showEditUserDialog = ref(false)
+// ── EDITING IDS ──
+const editingUserId = ref(null);
+const editingRoleId = ref(null);
+const editingServiceId = ref(null);
+const editingServiceRequestId = ref(null);
 
-const editingUserId = ref(null)
-const firstName = ref(null)
-const lastName = ref(null)
-const fullName = ref(null)
-const email = ref(null)
-const phone = ref(null)
-const gender = ref(null)
-const dob = ref(null)
-const gymLocation = ref(null)
-const userRole = ref(null)
-const userIdNo = ref(null)
+// ── USER FORM FIELDS ──
+const firstName = ref('');
+const lastName = ref('');
+const email = ref('');
+const phone = ref('');
+const address = ref('');
+const userRole = ref('');
 
-const users = ref([])
-const roles = ref([])
-const equipment = ref([])
-const filteredUsers = computed (() => {
-    if (!search.value) return users.value
-    const q = search.value.toLowerCase()
-    return users.value.filter(u => 
-        u.name?.toLowerCase().includes(q) ||
-        u.email?.toLowerCase().includes(q) ||
-        u.role?.toLowerCase().includes(q) ||
-        u.gymLocation?.toLowerCase().includes(q)
-    )
-})
+// ── ROLE FORM FIELDS ──
+const roleName = ref('');
+const roleDescription = ref('');
+
+// ── SERVICE FORM FIELDS ──
+const serviceName = ref('');
+const serviceDescription = ref('');
+const servicePrice = ref('');
+const serviceLocation = ref('');
+const serviceContactInfo = ref('');
+const serviceImagePath = ref('');
+const serviceCategory = ref('');
+
+// ── SERVICE REQUEST FORM FIELDS ──
+const requestUserId = ref('');
+const requestServiceId = ref('');
+const requestDate = ref('');
+const requestStatus = ref('');
+const requestAddress = ref('');
+const requestDescription = ref('');
+const requestPrice = ref('');
+
+// ── DATA ──
+const users = ref([]);
+const roles = ref([]);
+const services = ref([]);
+const serviceRequests = ref([]);
+
+// ── COMPUTED ──
+const filteredUsers = computed(() => {
+  if (!search.value) return users.value;
+  const q = search.value.toLowerCase();
+  return users.value.filter(u =>
+    (u.name ?? '').toLowerCase().includes(q) ||
+    (u.email ?? '').toLowerCase().includes(q) ||
+    (u.phone ?? '').toLowerCase().includes(q) ||
+    (u.role ?? '').toLowerCase().includes(q)
+  );
+});
 
 const stats = computed(() => [
-    { label: 'Total Users', value: users.value.length, icon: 'mdi-account-group', color: '#4db8ff' },
-    { label: 'Active Equipment', value: equipment.value.filter(e => e.status === 'Active').length, icon: 'mdi-dumbbell', color: '#c8ff00' },
-    { label: 'System Roles', value: roles.value.length, icon: 'mdi-shield-account', color: '#ff9f43' },
-    { label: 'Active users', value: users.value.filter(u => !u.deleted_at).length, icon: 'mdi-account-check', color: '#ff9f43' }
-])
+  { label: 'Users', value: users.value.length, icon: 'mdi-account-group', color: '#4d8ef0' },
+  { label: 'Roles', value: roles.value.length, icon: 'mdi-shield-account', color: '#f39c12' },
+  { label: 'Services', value: services.value.length, icon: 'mdi-wrench', color: '#27ae60' },
+  { label: 'Service Requests', value: serviceRequests.value.length, icon: 'mdi-file-document', color: '#e74c3c' },
+]);
 
-const rules = {
-    required: value => !!value || 'Required.',
-    min: v => v.length >= 8 || 'Min 8 characters',
-}
+// ── COLOR MAPS ──
+const roleColors = { Admin: '#ff6b6b', Customer: '#4d8ef0', Provider: '#27ae60' };
+const statusColors = { pending: '#f39c12', active: '#4d8ef0', completed: '#27ae60', cancelled: '#e74c3c' };
 
-const headers = { Authorization: `Bearer ${token}` }
-
+// ── FETCH ──
 async function fetchUsers() {
-    try {
-        loading.value = true
-        const response = await api.get('users', { headers })
-        users.value = response.data ?? []
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Failed to retrieve data'
-    } finally {
-        loading.value = false
-    }
+  loading.value = true;
+  try {
+    const { data } = await api.get('/users');
+    users.value = data.users ?? data.data ?? data ?? [];
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to fetch users';
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function fetchRoles() {
-  console.log('token:', localStorage.getItem('authToken'))
-    try {
-        const response = await api.get('getRoles', { headers })
-        console.log('roles response:', response.data)
-        roles.value = response.data ?? []
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Failed to retrieve data'
-    }
+  try {
+    const { data } = await api.get('/roles');
+    roles.value = data.roles ?? data.data ?? data ?? [];
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to fetch roles';
+  }
 }
 
-async function fetchEquipment() {
-    try {
-        const response = await api.get('getEquipment', { headers })
-        equipment.value = response.data ?? []
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Failed to retrieve data'
-    }
+async function fetchServices() {
+  try {
+    const { data } = await api.get('/services');
+    services.value = data.services ?? data.data ?? data ?? [];
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to fetch services';
+  }
 }
 
+async function fetchServiceRequests() {
+  try {
+    const { data } = await api.get('/service-requests');
+    serviceRequests.value = data.service_requests ?? data.data ?? data ?? [];
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to fetch service requests';
+  }
+}
+
+// ── ADD ──
 async function addUser() {
-    error.value = ''
-    loading.value = true
-    const formData = new FormData()
-    formData.append('name', `${firstName.value} ${lastName.value}`)
-    formData.append('email', email.value)
-    formData.append('phone', phone.value)
-    formData.append('gender', gender.value)
-    formData.append('dob', dob.value)
-    formData.append('gymLocation', gymLocation.value)
-    formData.append('role_id', userRole.value)
-    try {
-        await api.post('users', formData, { headers })
-        close()
-        await fetchUsers()
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Failed to create user'
-    } finally {
-        loading.value = false
-    }
-}
-
-function editUser(item) {
-    editingUserId.value = item.id
-    const parts = item.name?.split(' ') ?? []
-    firstName.value = parts[0] ?? ''
-    lastName.value = parts.slice(1).join(' ') ?? ''
-    email.value = item.email
-    phone.value = item.phone
-    userRole.value = String(item.role_id ?? '')
-    showEditUserDialog.value = true
-}
-
-async function updateUser() {
-    error.value = ''
-    loading.value = true
-    try {
-        await api.put(`users/${editingUserId.value}`, {
-            name: `${firstName.value} ${lastName.value}`,
-            email: email.value,
-            phone: phone.value,
-            role_id: userRole.value,
-        }, { headers})
-        close()
-        await fetchUsers()
-    } catch (err) {
-        error.value = err.response?.data?.message || 'User update failed'
-    } finally {
-        loading.value = false
-    }
-}
-
-// Activate or Deactivate user
-async function deactivateUser(item) {
-    try {
-        await api.delete(`users/${item.id}`, { headers })
-        await fetchUsers()
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Deactivation failed'
-    }
-}
-
-async function activateUser(item) {
-    try {
-        await api.post(`users/${item.id}/restore`, {}, { headers })
-        await fetchUsers()
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Activation failed'
-    }
+  error.value = '';
+  loading.value = true;
+  try {
+    const payload = new FormData();
+    payload.append('name', `${firstName.value} ${lastName.value}`);
+    payload.append('email', email.value);
+    payload.append('phone', phone.value);
+    payload.append('address', address.value);
+    payload.append('role', userRole.value);
+    await api.post('/users', payload);
+    close();
+    await fetchUsers();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to add user';
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function addRole() {
-    error.value = ''
-    loading.value = true
-    try {
-        await api.post('saveRole', { name: roleName.value }, { headers })
-        close()
-        await fetchRoles()
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Creating role failed'
-    } finally {
-        loading.value = false
-    }
+  error.value = '';
+  loading.value = true;
+  try {
+    const payload = new FormData();
+    payload.append('name', roleName.value);
+    payload.append('description', roleDescription.value);
+    await api.post('/roles', payload);
+    close();
+    await fetchRoles();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to add role';
+  } finally {
+    loading.value = false;
+  }
 }
 
-async function addEquipment() {
-    error.value = ''
-    loading.value = true
-    const formData = new FormData()
-    formData.append('name', equipmentName.value)
-    formData.append('model_no', modelNo.value)
-    formData.append('value', equipmentValue.value)
-    formData.append('usage', equipmentUsage.value)
-    formData.append('status', equipmentStatus.value)
-    try {
-        await api.post('saveEquipment', formData, { headers })
-        close()
-        await fetchEquipment()
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Adding equipment failed'
-    } finally {
-        loading.value = false
-    }
+async function addService() {
+  error.value = '';
+  loading.value = true;
+  try {
+    const payload = new FormData();
+    payload.append('name', serviceName.value);
+    payload.append('description', serviceDescription.value);
+    payload.append('price', servicePrice.value);
+    payload.append('category', serviceCategory.value);
+    payload.append('location', serviceLocation.value);
+    payload.append('contact_info', serviceContactInfo.value);
+    if (serviceImagePath.value) payload.append('image', serviceImagePath.value);
+    await api.post('services', payload);
+    close();
+    await fetchServices();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to add service';
+  } finally {
+    loading.value = false;
+  }
 }
 
-async function updateEquipment() {
-    error.value = ''
-    loading.value = true
-    try {
-        await api.put(`updateEquipment/${editingEquipmentId.value}`, {
-            name: equipmentName.value,
-            model_no: modelNo.value,
-            value: equipmentValue.value,
-            status: equipmentStatus.value,
-        }, { headers })
-        close()
-        await fetchEquipment()
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Updating equipment failed'
-    } finally {
-        loading.value = false
-    }
+async function addServiceRequest() {
+  error.value = '';
+  loading.value = true;
+  try {
+    const payload = new FormData();
+    payload.append('user_id', requestUserId.value);
+    payload.append('service_id', requestServiceId.value);
+    payload.append('request_date', requestDate.value);
+    payload.append('status', requestStatus.value);
+    payload.append('address', requestAddress.value);
+    payload.append('description', requestDescription.value);
+    await api.post('/service-requests', payload);
+    close();
+    await fetchServiceRequests();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to add service request';
+  } finally {
+    loading.value = false;
+  }
+}
+
+// ── EDIT OPENERS ──
+function editUser(item) {
+  editingUserId.value = item.id;
+  const parts = (item.name ?? '').split(' ');
+  firstName.value = parts[0] ?? '';
+  lastName.value = parts.slice(1).join(' ') ?? '';
+  email.value = item.email ?? '';
+  phone.value = item.phone ?? '';
+  address.value = item.address ?? '';
+  userRole.value = item.role ?? '';
+  showEditUserDialog.value = true;
+}
+
+function editRole(item) {
+  editingRoleId.value = item.id;
+  roleName.value = item.name ?? '';
+  roleDescription.value = item.description ?? '';
+  showEditRoleDialog.value = true;
+}
+
+function editService(item) {
+  editingServiceId.value = item.id;
+  serviceName.value = item.name ?? '';
+  serviceDescription.value = item.description ?? '';
+  servicePrice.value = item.price ?? '';
+  serviceCategory.value = item.category ?? '';
+  serviceLocation.value = item.location ?? '';
+  serviceContactInfo.value = item.contact_info ?? '';
+  showEditServiceDialog.value = true;
+}
+
+function editServiceRequest(item) {
+  editingServiceRequestId.value = item.id;
+  requestUserId.value = item.user_id ?? '';
+  requestServiceId.value = item.service_id ?? '';
+  requestDate.value = item.request_date ?? '';
+  requestStatus.value = item.status ?? '';
+  requestAddress.value = item.address ?? '';
+  requestDescription.value = item.description ?? '';
+  showEditServiceRequestDialog.value = true;
+}
+
+function openDeleteUser(item) {
+  editingUserId.value = item.id;
+  showDeleteUserDialog.value = true;
+}
+
+function openDeleteRole(item) {
+  editingRoleId.value = item.id;
+  showDeleteRoleDialog.value = true;
+}
+
+function openDeleteService(item) {
+  editingServiceId.value = item.id;
+  showDeleteServiceDialog.value = true;
+}
+
+function openDeleteServiceRequest(item) {
+  editingServiceRequestId.value = item.id;
+  showDeleteServiceRequestDialog.value = true;
+}
+
+// ── UPDATE ──
+async function updateUser() {
+  error.value = '';
+  loading.value = true;
+  try {
+    const payload = new FormData();
+    payload.append('name', `${firstName.value} ${lastName.value}`);
+    payload.append('email', email.value);
+    payload.append('phone', phone.value);
+    payload.append('address', address.value);
+    payload.append('role', userRole.value);
+    payload.append('_method', 'PUT');
+    await api.post(`/users/${editingUserId.value}`, payload);
+    close();
+    await fetchUsers();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to update user';
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function updateRole() {
-    error.value = ''
-    loading.value = true
-    try {
-        await api.put(`updateRole/${editingRoleId.value}`, { name: roleName.value }, { headers })
-        close()
-        await fetchRoles()
-    } catch (err) {
-        error.value = err.response?.data?.message || 'Updating role failed'
-    } finally {
-        loading.value = false
-    }
+  error.value = '';
+  loading.value = true;
+  try {
+    const payload = new FormData();
+    payload.append('name', roleName.value);
+    payload.append('description', roleDescription.value);
+    payload.append('_method', 'PUT');
+    await api.post(`/roles/${editingRoleId.value}`, payload);
+    close();
+    await fetchRoles();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to update role';
+  } finally {
+    loading.value = false;
+  }
 }
 
+async function updateService() {
+  error.value = '';
+  loading.value = true;
+  try {
+    const payload = new FormData();
+    payload.append('name', serviceName.value);
+    payload.append('description', serviceDescription.value);
+    payload.append('price', servicePrice.value);
+    payload.append('category', serviceCategory.value);
+    payload.append('_method', 'PUT');
+    if (serviceImagePath.value instanceof File) payload.append('image', serviceImagePath.value);
+    await api.post(`/services/${editingServiceId.value}`, payload);
+    close();
+    await fetchServices();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to update service';
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function updateServiceRequest() {
+  error.value = '';
+  loading.value = true;
+  try {
+    const payload = new FormData();
+    payload.append('user_id', requestUserId.value);
+    payload.append('service_id', requestServiceId.value);
+    payload.append('request_date', requestDate.value);
+    payload.append('status', requestStatus.value);
+    payload.append('address', requestAddress.value);
+    payload.append('description', requestDescription.value);
+    payload.append('_method', 'PUT');
+    await api.post(`/service-requests/${editingServiceRequestId.value}`, payload);
+    close();
+    await fetchServiceRequests();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to update service request';
+  } finally {
+    loading.value = false;
+  }
+}
+
+// ── DELETE ──
+async function deleteUser() {
+  loading.value = true;
+  try {
+    await api.delete(`/users/${editingUserId.value}`);
+    close();
+    await fetchUsers();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to delete user';
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function deleteRole() {
+  loading.value = true;
+  try {
+    await api.delete(`/roles/${editingRoleId.value}`);
+    close();
+    await fetchRoles();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to delete role';
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function deleteService() {
+  loading.value = true;
+  try {
+    await api.delete(`/services/${editingServiceId.value}`);
+    close();
+    await fetchServices();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to delete service';
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function deleteServiceRequest() {
+  loading.value = true;
+  try {
+    await api.delete(`/service-requests/${editingServiceRequestId.value}`);
+    close();
+    await fetchServiceRequests();
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to delete service request';
+  } finally {
+    loading.value = false;
+  }
+}
+
+// ── CLOSE / RESET ──
 function close() {
-    showAddUserDialog.value = false
-    showEditUserDialog.value = false
-    showAddRoleDialog.value = false
-    showAddEquipmentDialog.value = false
-    editingUserId.value = null
-    firstName.value = null
-    lastName.value = null
-    fullName.value = null
-    email.value = null
-    phone.value = null
-    gender.value = null
-    dob.value = null
-    gymLocation.value = null
-    userRole.value = null
-    error.value = ''
+  showAddUserDialog.value = false;
+  showAddRoleDialog.value = false;
+  showAddServiceDialog.value = false;
+  showAddServiceRequestDialog.value = false;
+  showEditUserDialog.value = false;
+  showEditRoleDialog.value = false;
+  showEditServiceDialog.value = false;
+  showEditServiceRequestDialog.value = false;
+  showDeleteUserDialog.value = false;
+  showDeleteRoleDialog.value = false;
+  showDeleteServiceDialog.value = false;
+  showDeleteServiceRequestDialog.value = false;
+  editingUserId.value = null;
+  editingRoleId.value = null;
+  editingServiceId.value = null;
+  editingServiceRequestId.value = null;
+  firstName.value = ''; lastName.value = ''; email.value = '';
+  phone.value = ''; address.value = ''; userRole.value = '';
+  roleName.value = ''; roleDescription.value = '';
+  serviceName.value = ''; serviceDescription.value = '';
+  servicePrice.value = ''; serviceCategory.value = '';
+  serviceLocation.value = ''; serviceContactInfo.value = '';
+  serviceImagePath.value = '';
+  requestUserId.value = ''; requestServiceId.value = '';
+  requestDate.value = ''; requestStatus.value = '';
+  requestAddress.value = ''; requestDescription.value = '';
+  error.value = '';
 }
-
-const roleColors = { Admin: '#ff6b6b', Trainer: '#4db8ff', Member: '#c8ff00', Staff: '#ff9f43' }
-const statusColors = { Active: '#c8ff00', Maintenance: '#ffaa00', Retired: '#ff6b6b', Available: '#4db8ff' }
 
 onMounted(() => {
-    fetchUsers()
-    fetchRoles()
-    fetchEquipment()
-})
+  fetchUsers();
+  fetchRoles();
+  fetchServices();
+  fetchServiceRequests();
+});
 </script>
 
 <template>
@@ -257,23 +449,17 @@ onMounted(() => {
 
   <div class="admin-page">
 
-    <!-- ── PAGE HEADER ─────────────────────────────────── -->
+    <!-- Header -->
     <div class="page-header">
       <div class="page-header-inner">
         <div>
           <div class="page-eyebrow">CONTROL PANEL</div>
           <h1 class="page-title">ADMIN<br><em>DASHBOARD</em></h1>
         </div>
-        <div class="header-actions">
-          <button class="header-btn" @click="tab === 1 ? showAddUserDialog = true : tab === 2 ? showAddRoleDialog = true : showAddEquipmentDialog = true">
-            <v-icon icon="mdi-plus" size="16"></v-icon>
-            Add {{ tab === 1 ? 'User' : tab === 2 ? 'Role' : 'Equipment' }}
-          </button>
-        </div>
       </div>
     </div>
 
-    <!-- ── STATS ROW ───────────────────────────────────── -->
+    <!-- Stats -->
     <div class="stats-row">
       <div v-for="s in stats" :key="s.label" class="stat-card">
         <div class="stat-icon-wrap" :style="{ background: s.color + '18' }">
@@ -286,19 +472,19 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- ── MAIN PANEL ──────────────────────────────────── -->
+    <!-- Main panel -->
     <div class="main-panel">
 
       <!-- Tabs -->
       <div class="tabs-row">
         <button
-          v-for="(t, i) in ['Users', 'Roles', 'Equipment']"
+          v-for="(t, i) in ['Users', 'Roles', 'Services', 'Service Requests']"
           :key="t"
           class="tab-btn"
           :class="{ 'tab-btn--active': tab === i + 1 }"
           @click="tab = i + 1"
         >
-          <v-icon :icon="['mdi-account-group', 'mdi-shield-account', 'mdi-dumbbell'][i]" size="16"></v-icon>
+          <v-icon :icon="['mdi-account-group','mdi-shield-account','mdi-wrench','mdi-file-document'][i]" size="16"></v-icon>
           {{ t }}
         </button>
       </div>
@@ -310,7 +496,7 @@ onMounted(() => {
         <button class="error-close" @click="error = ''">✕</button>
       </div>
 
-      <!-- ── USERS TAB ──────────────────────────────────── -->
+      <!-- ── USERS TAB ── -->
       <div v-if="tab === 1" class="tab-content">
         <div class="table-toolbar">
           <div class="search-wrap">
@@ -322,43 +508,45 @@ onMounted(() => {
           </button>
         </div>
 
-        <div v-if="!filteredUsers.length" class="empty-state">
+        <div v-if="loading" class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr v-for="n in 4" :key="n">
+                <td colspan="6"><div class="skel" style="height:14px;width:80%;border-radius:2px"></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div v-else-if="!filteredUsers.length" class="empty-state">
           <v-icon icon="mdi-account-off-outline" class="empty-icon"></v-icon>
           <div class="empty-text">No users found</div>
-          <button class="add-btn" @click="showAddUserDialog = true">
-            <v-icon icon="mdi-plus" size="15"></v-icon> Add First User
-          </button>
         </div>
 
         <div v-else class="table-wrap">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Role</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>Name</th><th>Email</th><th>Phone</th>
+                <th>Role</th><th>Status</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="item in filteredUsers" :key="item.id" :class="{ 'row--inactive': item.deleted_at }">
                 <td>
                   <div class="user-name-cell">
-                    <div class="user-avatar">{{ item.name.charAt(0) }}</div>
+                    <div class="user-avatar">{{ item.name?.charAt(0) }}</div>
                     {{ item.name }}
                   </div>
                 </td>
                 <td class="cell-muted">{{ item.email }}</td>
-                <td class="cell-muted">{{ item.phone }}</td>
+                <td class="cell-muted">{{ item.phone ?? '—' }}</td>
                 <td>
-                  <span class="role-badge" :style="{ background: (roleColors[item.role] || '#aaa') + '18', color: roleColors[item.role] || '#aaa' }">
-                    {{ item.role }}
+                  <span class="role-badge" :style="{ background: (roleColors[item.role] || '#888') + '18', color: roleColors[item.role] || '#888' }">
+                    {{ item.role ?? '—' }}
                   </span>
                 </td>
-                <td class="cell-muted">{{ item.gymLocation }}</td>
                 <td>
                   <span class="status-dot" :class="item.deleted_at ? 'status-dot--off' : 'status-dot--on'">
                     {{ item.deleted_at ? 'Inactive' : 'Active' }}
@@ -366,19 +554,12 @@ onMounted(() => {
                 </td>
                 <td>
                   <div class="action-btns">
-                    <template v-if="!item.deleted_at">
-                      <button class="action-btn action-btn--edit" @click="editUser(item)" title="Edit">
-                        <v-icon icon="mdi-pencil" size="14"></v-icon>
-                      </button>
-                      <button class="action-btn action-btn--warn" title="Deactivate">
-                        <v-icon icon="mdi-account-cancel" size="14"></v-icon>
-                      </button>
-                    </template>
-                    <template v-else>
-                      <button class="action-btn action-btn--success" title="Activate">
-                        <v-icon icon="mdi-account-check" size="14"></v-icon>
-                      </button>
-                    </template>
+                    <button class="action-btn action-btn--edit" @click="editUser(item)" title="Edit">
+                      <v-icon icon="mdi-pencil" size="14"></v-icon>
+                    </button>
+                    <button class="action-btn action-btn--warn" @click="openDeleteUser(item)" title="Delete">
+                      <v-icon icon="mdi-delete" size="14"></v-icon>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -387,7 +568,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- ── ROLES TAB ──────────────────────────────────── -->
+      <!-- ── ROLES TAB ── -->
       <div v-if="tab === 2" class="tab-content">
         <div class="table-toolbar">
           <div class="toolbar-title">System Roles</div>
@@ -404,24 +585,23 @@ onMounted(() => {
         <div v-else class="table-wrap">
           <table class="data-table">
             <thead>
-              <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Actions</th>
-              </tr>
+              <tr><th>Name</th><th>Description</th><th>Actions</th></tr>
             </thead>
             <tbody>
               <tr v-for="item in roles" :key="item.id">
                 <td>
-                  <span class="role-badge" :style="{ background: (roleColors[item.name] || '#aaa') + '18', color: roleColors[item.name] || '#aaa' }">
+                  <span class="role-badge" :style="{ background: (roleColors[item.name] || '#888') + '18', color: roleColors[item.name] || '#888' }">
                     {{ item.name }}
                   </span>
                 </td>
-                <td class="cell-muted">{{ item.description }}</td>
+                <td class="cell-muted">{{ item.description ?? '—' }}</td>
                 <td>
                   <div class="action-btns">
-                    <button class="action-btn action-btn--edit" title="Edit Role">
+                    <button class="action-btn action-btn--edit" @click="editRole(item)" title="Edit">
                       <v-icon icon="mdi-pencil" size="14"></v-icon>
+                    </button>
+                    <button class="action-btn action-btn--warn" @click="openDeleteRole(item)" title="Delete">
+                      <v-icon icon="mdi-delete" size="14"></v-icon>
                     </button>
                   </div>
                 </td>
@@ -431,52 +611,42 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- ── EQUIPMENT TAB ──────────────────────────────── -->
+      <!-- ── SERVICES TAB ── -->
       <div v-if="tab === 3" class="tab-content">
         <div class="table-toolbar">
-          <div class="toolbar-title">Gym Equipment</div>
-          <button class="add-btn" @click="showAddEquipmentDialog = true">
-            <v-icon icon="mdi-plus" size="15"></v-icon> Add Equipment
+          <div class="toolbar-title">All Services</div>
+          <button class="add-btn" @click="showAddServiceDialog = true">
+            <v-icon icon="mdi-plus" size="15"></v-icon> Add Service
           </button>
         </div>
 
-        <div v-if="!equipment.length" class="empty-state">
-          <v-icon icon="mdi-dumbbell" class="empty-icon"></v-icon>
-          <div class="empty-text">No equipment found</div>
+        <div v-if="!services.length" class="empty-state">
+          <v-icon icon="mdi-wrench-outline" class="empty-icon"></v-icon>
+          <div class="empty-text">No services found</div>
         </div>
 
         <div v-else class="table-wrap">
           <table class="data-table">
             <thead>
-              <tr>
-                <th>Name</th>
-                <th>Model No</th>
-                <th>Value</th>
-                <th>Usage</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
+              <tr><th>Name</th><th>Category</th><th>Description</th><th>Price</th><th>Actions</th></tr>
             </thead>
             <tbody>
-              <tr v-for="item in equipment" :key="item.id">
+              <tr v-for="item in services" :key="item.id">
                 <td class="cell-bold">{{ item.name }}</td>
-                <td><span class="mono">{{ item.model_no }}</span></td>
-                <td class="cell-muted">{{ item.value }}</td>
                 <td>
-                  <span class="usage-tag">{{ item.usage }}</span>
-                </td>
-                <td>
-                  <span class="status-dot" :class="item.status === 'Active' ? 'status-dot--on' : 'status-dot--warn'">
-                    {{ item.status }}
+                  <span class="role-badge" style="background:rgba(77,142,240,.1);color:#4d8ef0">
+                    {{ item.category ?? '—' }}
                   </span>
                 </td>
+                <td class="cell-muted">{{ item.description?.slice(0, 60) }}{{ item.description?.length > 60 ? '…' : '' }}</td>
+                <td class="cell-muted">KES {{ Number(item.price).toLocaleString() }}</td>
                 <td>
                   <div class="action-btns">
-                    <button class="action-btn action-btn--edit" title="Edit">
+                    <button class="action-btn action-btn--edit" @click="editService(item)" title="Edit">
                       <v-icon icon="mdi-pencil" size="14"></v-icon>
                     </button>
-                    <button class="action-btn action-btn--warn" title="Retire">
-                      <v-icon icon="mdi-archive-outline" size="14"></v-icon>
+                    <button class="action-btn action-btn--warn" @click="openDeleteService(item)" title="Delete">
+                      <v-icon icon="mdi-delete" size="14"></v-icon>
                     </button>
                   </div>
                 </td>
@@ -486,214 +656,526 @@ onMounted(() => {
         </div>
       </div>
 
-    </div>
-  </div>
-
-  <!-- ── ADD USER DIALOG ───────────────────────────────── -->
-  <v-dialog v-model="showAddUserDialog" max-width="580">
-    <div class="dialog-card">
-      <div class="dialog-header">
-        <div>
-          <div class="dialog-eyebrow">ADMIN ACTION</div>
-          <h3 class="dialog-title">Add New User</h3>
+      <!-- ── SERVICE REQUESTS TAB ── -->
+      <div v-if="tab === 4" class="tab-content">
+        <div class="table-toolbar">
+          <div class="toolbar-title">All Service Requests</div>
+          <button class="add-btn" @click="showAddServiceRequestDialog = true">
+            <v-icon icon="mdi-plus" size="15"></v-icon> Add Request
+          </button>
         </div>
-        <button class="dialog-close" @click="close">
-          <v-icon icon="mdi-close" size="18"></v-icon>
-        </button>
+
+        <div v-if="!serviceRequests.length" class="empty-state">
+          <v-icon icon="mdi-file-document-off-outline" class="empty-icon"></v-icon>
+          <div class="empty-text">No service requests found</div>
+        </div>
+
+        <div v-else class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>Service</th><th>Customer</th><th>Description</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in serviceRequests" :key="item.id">
+                <td class="cell-muted">REQ-{{ String(item.id).padStart(3,'0') }}</td>
+                <td class="cell-bold">{{ item.service?.name ?? 'Service #' + item.service_id }}</td>
+                <td class="cell-muted">{{ item.user?.name ?? '—' }}</td>
+                <td class="cell-muted">{{ item.description?.slice(0, 50) }}{{ item.description?.length > 50 ? '…' : '' }}</td>
+                <td class="cell-muted">
+                  {{ item.request_date
+                    ? new Date(item.request_date).toLocaleDateString('en-KE', { day:'2-digit', month:'short', year:'numeric' })
+                    : '—' }}
+                </td>
+                <td>
+                  <span class="status-dot" :style="{ color: statusColors[item.status] ?? '#aaa' }">
+                    {{ item.status }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-btns">
+                    <button class="action-btn action-btn--edit" @click="editServiceRequest(item)" title="Edit">
+                      <v-icon icon="mdi-pencil" size="14"></v-icon>
+                    </button>
+                    <button class="action-btn action-btn--warn" @click="openDeleteServiceRequest(item)" title="Delete">
+                      <v-icon icon="mdi-delete" size="14"></v-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+    </div>
 
-      <div class="dialog-body">
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label">FIRST NAME</label>
-            <div class="field-wrap">
-              <input v-model="firstName" type="text" class="field-input" placeholder="John" />
-            </div>
+    <!-- ══════════════════════════════════════════
+         DIALOGS
+    ══════════════════════════════════════════ -->
+
+    <!-- ADD USER -->
+    <v-dialog v-model="showAddUserDialog" max-width="580">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow">ADMIN ACTION</div>
+            <h3 class="dialog-title">Add New User</h3>
           </div>
-          <div class="field-group">
-            <label class="field-label">LAST NAME</label>
-            <div class="field-wrap">
-              <input v-model="lastName" type="text" class="field-input" placeholder="Doe" />
-            </div>
-          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
         </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label">EMAIL</label>
-            <div class="field-wrap">
-              <input v-model="email" type="email" class="field-input" placeholder="user@macfit.co.ke" />
+        <div class="dialog-body">
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">First Name</label>
+              <div class="field-wrap"><input v-model="firstName" type="text" class="field-input" placeholder="John" /></div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Last Name</label>
+              <div class="field-wrap"><input v-model="lastName" type="text" class="field-input" placeholder="Doe" /></div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Email</label>
+              <div class="field-wrap"><input v-model="email" type="email" class="field-input" placeholder="user@example.com" /></div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Phone</label>
+              <div class="field-wrap"><input v-model="phone" type="tel" class="field-input" placeholder="+254 700 000 000" /></div>
             </div>
           </div>
           <div class="field-group">
-            <label class="field-label">PHONE NUMBER</label>
-            <div class="field-wrap">
-              <input v-model="phone" type="tel" class="field-input" placeholder="+254 700 000 000" />
+            <label class="field-label">Address</label>
+            <div class="field-wrap"><input v-model="address" type="text" class="field-input" placeholder="123 Main St, Nairobi" /></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Role</label>
+            <div class="radio-grid">
+              <label v-for="r in [['Admin','Admin'],['Provider','Provider'],['Customer','Customer']]" :key="r[0]"
+                class="radio-chip" :class="{ 'radio-chip--sel': userRole === r[0] }">
+                <input type="radio" v-model="userRole" :value="r[0]" hidden />{{ r[1] }}
+              </label>
             </div>
           </div>
+          <div v-if="error" class="dialog-error">{{ error }}</div>
         </div>
-        <div class="field-row">
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">CANCEL</button>
+          <button class="dialog-btn-primary" :disabled="loading" @click="addUser">
+            <span v-if="!loading">SAVE USER →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- EDIT USER -->
+    <v-dialog v-model="showEditUserDialog" max-width="580">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow">EDIT RECORD</div>
+            <h3 class="dialog-title">Edit User</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">First Name</label>
+              <div class="field-wrap"><input v-model="firstName" type="text" class="field-input" /></div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Last Name</label>
+              <div class="field-wrap"><input v-model="lastName" type="text" class="field-input" /></div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Email</label>
+              <div class="field-wrap"><input v-model="email" type="email" class="field-input" /></div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Phone</label>
+              <div class="field-wrap"><input v-model="phone" type="tel" class="field-input" /></div>
+            </div>
+          </div>
           <div class="field-group">
-            <label class="field-label">GYM LOCATION</label>
+            <label class="field-label">Address</label>
+            <div class="field-wrap"><input v-model="address" type="text" class="field-input" /></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Role</label>
+            <div class="radio-grid">
+              <label v-for="r in [['Admin','Admin'],['Provider','Provider'],['Customer','Customer']]" :key="r[0]"
+                class="radio-chip" :class="{ 'radio-chip--sel': userRole === r[0] }">
+                <input type="radio" v-model="userRole" :value="r[0]" hidden />{{ r[1] }}
+              </label>
+            </div>
+          </div>
+          <div v-if="error" class="dialog-error">{{ error }}</div>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">CANCEL</button>
+          <button class="dialog-btn-primary" :disabled="loading" @click="updateUser">
+            <span v-if="!loading">UPDATE USER →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- DELETE USER -->
+    <v-dialog v-model="showDeleteUserDialog" max-width="440">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow" style="color:#ff6b6b">CONFIRM DELETE</div>
+            <h3 class="dialog-title">Delete User?</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <p style="font-size:.88rem;color:rgba(240,237,230,.55);line-height:1.7">This will permanently delete this user. This action cannot be undone.</p>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">GO BACK</button>
+          <button class="dialog-btn-danger" :disabled="loading" @click="deleteUser">
+            <span v-if="!loading">YES, DELETE →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- ADD ROLE -->
+    <v-dialog v-model="showAddRoleDialog" max-width="480">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow">ADMIN ACTION</div>
+            <h3 class="dialog-title">Add New Role</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <div class="field-group">
+            <label class="field-label">Role Name</label>
+            <div class="field-wrap"><input v-model="roleName" type="text" class="field-input" placeholder="e.g. Admin" /></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Description</label>
+            <div class="field-wrap"><textarea v-model="roleDescription" class="field-input field-textarea" placeholder="Describe this role…" rows="3"></textarea></div>
+          </div>
+          <div v-if="error" class="dialog-error">{{ error }}</div>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">CANCEL</button>
+          <button class="dialog-btn-primary" :disabled="loading" @click="addRole">
+            <span v-if="!loading">SAVE ROLE →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- EDIT ROLE -->
+    <v-dialog v-model="showEditRoleDialog" max-width="480">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow">EDIT RECORD</div>
+            <h3 class="dialog-title">Edit Role</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <div class="field-group">
+            <label class="field-label">Role Name</label>
+            <div class="field-wrap"><input v-model="roleName" type="text" class="field-input" /></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Description</label>
+            <div class="field-wrap"><textarea v-model="roleDescription" class="field-input field-textarea" rows="3"></textarea></div>
+          </div>
+          <div v-if="error" class="dialog-error">{{ error }}</div>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">CANCEL</button>
+          <button class="dialog-btn-primary" :disabled="loading" @click="updateRole">
+            <span v-if="!loading">UPDATE ROLE →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- DELETE ROLE -->
+    <v-dialog v-model="showDeleteRoleDialog" max-width="440">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow" style="color:#ff6b6b">CONFIRM DELETE</div>
+            <h3 class="dialog-title">Delete Role?</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <p style="font-size:.88rem;color:rgba(240,237,230,.55);line-height:1.7">This will permanently delete this role. Users assigned to it may be affected.</p>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">GO BACK</button>
+          <button class="dialog-btn-danger" :disabled="loading" @click="deleteRole">
+            <span v-if="!loading">YES, DELETE →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- ADD SERVICE -->
+    <v-dialog v-model="showAddServiceDialog" max-width="560">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow">ADMIN ACTION</div>
+            <h3 class="dialog-title">Add New Service</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Service Name</label>
+              <div class="field-wrap"><input v-model="serviceName" type="text" class="field-input" placeholder="e.g. Plumbing Repair" /></div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Price (KES)</label>
+              <div class="field-wrap"><input v-model="servicePrice" type="number" class="field-input" placeholder="5000" /></div>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Category</label>
             <div class="field-wrap field-wrap--select">
-              <select v-model="gymLocation" class="field-input field-select">
-                <option value="" disabled>Select location</option>
-                <option v-for="loc in ['CBD','Kilimani','Westlands','Buruburu']" :key="loc" :value="loc">{{ loc }}</option>
+              <select v-model="serviceCategory" class="field-input field-select">
+                <option value="" disabled>Select category</option>
+                <option v-for="c in ['Plumbing','Electrical','Cleaning','Web Design','Marketing','Construction','Other']" :key="c" :value="c">{{ c }}</option>
               </select>
               <v-icon icon="mdi-chevron-down" class="select-caret"></v-icon>
             </div>
           </div>
           <div class="field-group">
-            <label class="field-label">DATE OF BIRTH</label>
-            <div class="field-wrap">
-              <input v-model="dob" type="date" class="field-input field-date" />
+            <label class="field-label">Description</label>
+            <div class="field-wrap"><textarea v-model="serviceDescription" class="field-input field-textarea" placeholder="Describe the service…" rows="3"></textarea></div>
+          </div>
+          <div v-if="error" class="dialog-error">{{ error }}</div>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">CANCEL</button>
+          <button class="dialog-btn-primary" :disabled="loading" @click="addService">
+            <span v-if="!loading">SAVE SERVICE →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- EDIT SERVICE -->
+    <v-dialog v-model="showEditServiceDialog" max-width="560">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow">EDIT RECORD</div>
+            <h3 class="dialog-title">Edit Service</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Service Name</label>
+              <div class="field-wrap"><input v-model="serviceName" type="text" class="field-input" /></div>
             </div>
-          </div>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">ROLE</label>
-          <div class="radio-grid">
-            <label v-for="r in [['1','Admin'],['2','Trainer'],['3','Staff'],['4','User']]" :key="r[0]" class="radio-chip" :class="{ 'radio-chip--sel': userRole === r[0] }">
-              <input type="radio" v-model="userRole" :value="r[0]" hidden />
-              {{ r[1] }}
-            </label>
-          </div>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">GENDER</label>
-          <div class="radio-grid">
-            <label v-for="g in ['Male','Female','Non-binary','Prefer not to say']" :key="g" class="radio-chip" :class="{ 'radio-chip--sel': gender === g }">
-              <input type="radio" v-model="gender" :value="g" hidden />
-              {{ g }}
-            </label>
-          </div>
-        </div>
-
-        <div v-if="error" class="dialog-error">{{ error }}</div>
-      </div>
-
-      <div class="dialog-footer">
-        <button class="dialog-btn-ghost" @click="close">CANCEL</button>
-        <button class="dialog-btn-primary" :disabled="loading" @click="addUser">
-          <span v-if="!loading">SAVE USER →</span>
-          <span v-else>SAVING…</span>
-        </button>
-      </div>
-    </div>
-  </v-dialog>
-
-  <!-- ── EDIT USER DIALOG ──────────────────────────────── -->
-  <v-dialog v-model="showEditUserDialog" max-width="500">
-    <div class="dialog-card">
-      <div class="dialog-header">
-        <div>
-          <div class="dialog-eyebrow">EDIT RECORD</div>
-          <h3 class="dialog-title">Edit User</h3>
-        </div>
-        <button class="dialog-close" @click="close">
-          <v-icon icon="mdi-close" size="18"></v-icon>
-        </button>
-      </div>
-      <div class="dialog-body">
-        <div class="field-group">
-          <label class="field-label">FULL NAME</label>
-          <div class="field-wrap">
-            <input v-model="firstName" type="text" class="field-input" />
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">EMAIL</label>
-          <div class="field-wrap">
-            <input v-model="email" type="email" class="field-input" />
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">PHONE</label>
-          <div class="field-wrap">
-            <input v-model="phone" type="tel" class="field-input" />
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">ROLE</label>
-          <div class="radio-grid">
-            <label v-for="r in [['1','Admin'],['2','Trainer'],['3','Staff'],['4','User']]" :key="r[0]" class="radio-chip" :class="{ 'radio-chip--sel': userRole === r[0] }">
-              <input type="radio" v-model="userRole" :value="r[0]" hidden />
-              {{ r[1] }}
-            </label>
-          </div>
-        </div>
-        <div v-if="error" class="dialog-error">{{ error }}</div>
-      </div>
-      <div class="dialog-footer">
-        <button class="dialog-btn-ghost" @click="close">CANCEL</button>
-        <button class="dialog-btn-primary" :disabled="loading">UPDATE USER →</button>
-      </div>
-    </div>
-  </v-dialog>
-
-  <!--ADD EQUIPMENT DIALOG-->
-  <v-dialog v-model="showAddEquipmentDialog" max-width="500">
-    <div class="dialog-card">
-      <div class="dialog-header">
-        <div>
-          <div class="dialog-eyebrow">ADMIN ACTION</div>
-          <h3 class="dialog-title">Add New Equipment</h3>
-        </div>
-        <button class="dialog-close" @click="close">
-          <v-icon icon="mdi-close" size="18"></v-icon>
-        </button>
-      </div>
-
-      <div class="dialog-body">
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label">EQUIPMENT NAME</label>
-            <div class="field-wrap">
-              <input v-model="name" type="text" class="field-input" placeholder="Equipment Name">
+            <div class="field-group">
+              <label class="field-label">Price (KES)</label>
+              <div class="field-wrap"><input v-model="servicePrice" type="number" class="field-input" /></div>
             </div>
           </div>
           <div class="field-group">
-            <label class="field-label">STATUS</label>
-            <div class="field-wrap">
-              <input v-model="status" type="text" class="field-input" placeholder="Equipment Status">
-            </div>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label">MODEL NUMBER</label>
-            <div class="field-wrap">
-              <input v-model="modelNumber" type="text" class="field-input" placeholder="Model Number">
+            <label class="field-label">Category</label>
+            <div class="field-wrap field-wrap--select">
+              <select v-model="serviceCategory" class="field-input field-select">
+                <option value="" disabled>Select category</option>
+                <option v-for="c in ['Plumbing','Electrical','Cleaning','Web Design','Marketing','Construction','Other']" :key="c" :value="c">{{ c }}</option>
+              </select>
+              <v-icon icon="mdi-chevron-down" class="select-caret"></v-icon>
             </div>
           </div>
           <div class="field-group">
-            <label class="field-label">USAGE</label>
-            <div class="field-wrap">
-              <input v-model="usage" type="text" class="field-input" placeholder="Equipment Usage">
-            </div>
+            <label class="field-label">Description</label>
+            <div class="field-wrap"><textarea v-model="serviceDescription" class="field-input field-textarea" rows="3"></textarea></div>
           </div>
+          <div v-if="error" class="dialog-error">{{ error }}</div>
         </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label">VALUE</label>
-            <div class="field-wrap">
-              <input v-model="value" type="text" class="field-input" placeholder="Equipment Value">
-            </div>
-          </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">CANCEL</button>
+          <button class="dialog-btn-primary" :disabled="loading" @click="updateService">
+            <span v-if="!loading">UPDATE SERVICE →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
         </div>
-        <div v-if="error" class="dialog-error">{{ error }}</div>
       </div>
+    </v-dialog>
 
-      <div class="dialog-footer">
-        <button class="dialog-btn-ghost" @click="close">CANCEL</button>
-        <button class="dialog-btn-primary" :disabled="loading" @click="addEquipment">
-          <span v-if="!loading">SAVE EQUIPMENT</span>
-          <span v-else>SAVING...</span>
-        </button>
+    <!-- DELETE SERVICE -->
+    <v-dialog v-model="showDeleteServiceDialog" max-width="440">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow" style="color:#ff6b6b">CONFIRM DELETE</div>
+            <h3 class="dialog-title">Delete Service?</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <p style="font-size:.88rem;color:rgba(240,237,230,.55);line-height:1.7">This will permanently delete this service and all associated requests.</p>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">GO BACK</button>
+          <button class="dialog-btn-danger" :disabled="loading" @click="deleteService">
+            <span v-if="!loading">YES, DELETE →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
       </div>
-    </div>
-  </v-dialog>
+    </v-dialog>
+
+    <!-- ADD SERVICE REQUEST -->
+    <v-dialog v-model="showAddServiceRequestDialog" max-width="560">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow">ADMIN ACTION</div>
+            <h3 class="dialog-title">Add Service Request</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">User ID</label>
+              <div class="field-wrap"><input v-model="requestUserId" type="number" class="field-input" placeholder="User ID" /></div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Service ID</label>
+              <div class="field-wrap"><input v-model="requestServiceId" type="number" class="field-input" placeholder="Service ID" /></div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Request Date</label>
+              <div class="field-wrap"><input v-model="requestDate" type="date" class="field-input field-date" /></div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Status</label>
+              <div class="field-wrap field-wrap--select">
+                <select v-model="requestStatus" class="field-input field-select">
+                  <option value="" disabled>Select status</option>
+                  <option v-for="s in ['pending','active','completed','cancelled']" :key="s" :value="s">{{ s }}</option>
+                </select>
+                <v-icon icon="mdi-chevron-down" class="select-caret"></v-icon>
+              </div>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Address</label>
+            <div class="field-wrap"><input v-model="requestAddress" type="text" class="field-input" placeholder="Service address" /></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Description</label>
+            <div class="field-wrap"><textarea v-model="requestDescription" class="field-input field-textarea" rows="3" placeholder="Describe the request…"></textarea></div>
+          </div>
+          <div v-if="error" class="dialog-error">{{ error }}</div>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">CANCEL</button>
+          <button class="dialog-btn-primary" :disabled="loading" @click="addServiceRequest">
+            <span v-if="!loading">SAVE REQUEST →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- EDIT SERVICE REQUEST -->
+    <v-dialog v-model="showEditServiceRequestDialog" max-width="560">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow">EDIT RECORD</div>
+            <h3 class="dialog-title">Edit Service Request</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Request Date</label>
+              <div class="field-wrap"><input v-model="requestDate" type="date" class="field-input field-date" /></div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Status</label>
+              <div class="field-wrap field-wrap--select">
+                <select v-model="requestStatus" class="field-input field-select">
+                  <option v-for="s in ['pending','active','completed','cancelled']" :key="s" :value="s">{{ s }}</option>
+                </select>
+                <v-icon icon="mdi-chevron-down" class="select-caret"></v-icon>
+              </div>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Address</label>
+            <div class="field-wrap"><input v-model="requestAddress" type="text" class="field-input" /></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Description</label>
+            <div class="field-wrap"><textarea v-model="requestDescription" class="field-input field-textarea" rows="3"></textarea></div>
+          </div>
+          <div v-if="error" class="dialog-error">{{ error }}</div>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">CANCEL</button>
+          <button class="dialog-btn-primary" :disabled="loading" @click="updateServiceRequest">
+            <span v-if="!loading">UPDATE REQUEST →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- DELETE SERVICE REQUEST -->
+    <v-dialog v-model="showDeleteServiceRequestDialog" max-width="440">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <div class="dialog-eyebrow" style="color:#ff6b6b">CONFIRM DELETE</div>
+            <h3 class="dialog-title">Delete Request?</h3>
+          </div>
+          <button class="dialog-close" @click="close"><v-icon icon="mdi-close" size="18"></v-icon></button>
+        </div>
+        <div class="dialog-body">
+          <p style="font-size:.88rem;color:rgba(240,237,230,.55);line-height:1.7">This will permanently delete this service request. This action cannot be undone.</p>
+        </div>
+        <div class="dialog-footer">
+          <button class="dialog-btn-ghost" @click="close">GO BACK</button>
+          <button class="dialog-btn-danger" :disabled="loading" @click="deleteServiceRequest">
+            <span v-if="!loading">YES, DELETE →</span>
+            <span v-else class="loading-dots"><span></span><span></span><span></span></span>
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+  </div>
 </template>
 
 <style scoped>
@@ -707,7 +1189,7 @@ onMounted(() => {
 }
 
 .page-header {
-    background: #0d0d0d;
+    background: #060d1a;
     border-bottom: 1px solid rgba(200, 255, 0, 0.08);
     padding: 3rem 0 2rem;
 }
@@ -726,7 +1208,7 @@ onMounted(() => {
     font-size: 0.65rem;
     font-weight: 700;
     letter-spacing: 0.3em;
-    color: #c8ff00;
+    color: #4d8ef0;
     margin-bottom: 0.4rem;
 }
 
@@ -741,7 +1223,7 @@ onMounted(() => {
 
 .page-title em {
     font-style: italic;
-    color: #c8ff00;
+    color: #4d8ef0;
 }
 
 .header-btn {
@@ -749,7 +1231,7 @@ onMounted(() => {
     align-items: center;
     gap: 0.4rem;
     padding: 0.7rem 1.4rem;
-    background: #c8ff00;
+    background: #4d8ef0;
     border: none;
     color: #0a0a0a;
     font-family: 'Barlow Condensed', sans-serif;
@@ -764,7 +1246,7 @@ onMounted(() => {
 }
 
 .header-btn:hover {
-    background: #d9ff33;
+    background: #4d8ef0;
 }
 
 /* Stats row */
@@ -858,7 +1340,7 @@ onMounted(() => {
 
 .tab-btn--active {
     color: #f0ede6;
-    border-bottom-color: #c8ff00;
+    border-bottom-color: #4d8ef0;
 }
 
 .error-banner {
@@ -940,9 +1422,9 @@ onMounted(() => {
     align-items: center;
     gap: 0.4rem;
     padding: 0.65rem 1.2rem;
-    background: rgba(200, 255, 0, 0.1);
-    border: 1px solid rgba(200, 255, 0, 0.3);
-    color: #c8ff00;
+    background: rgba(13, 57, 169, 0.188);
+    border: 1px solid rgba(13, 57, 169, 0.3);
+    color: #4d8ef0;
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.85rem;
     font-weight: 700;
@@ -954,8 +1436,8 @@ onMounted(() => {
 }
 
 .add-btn:hover {
-    background: rgba(200, 255, 0, 0.18);
-    border-color: #c8ff00;
+    background: rgba(13, 57, 169, 0.18);
+    border-color: #4d8ef0;
 }
 
 .table-wrap {
@@ -1016,7 +1498,7 @@ onMounted(() => {
     width: 30px; 
     height: 30px;
     border: 1px solid rgba(200, 255, 0, 0.1);
-    color: #c8ff00;
+    color: #4d8ef0;
     display: grid;
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.9rem;
@@ -1051,8 +1533,8 @@ onMounted(() => {
     flex-shrink: 0;
 }
 
-.status-dot--on { color: #c8ff00; }
-.status-dot--on::before { background: #c8ff00; box-shadow: 0 0 6px #c8ff0088; }
+.status-dot--on { color: #4d8ef0; }
+.status-dot--on::before { background: #4d8ef0; box-shadow: 0 0 6px #4d8ef088; }
 .status-dot--off { color: rgba(240, 237, 230, 0.35); }
 .status-dot--off::before { background: rgba(240, 237, 230, 0.2); }
 .status-dot--warn { color: #ffaa00; }
@@ -1100,7 +1582,7 @@ onMounted(() => {
 
 .action-btn--edit:hover { border-color: #4db8ff; color: #4db8ff; background: rgba(77, 184, 255, 0.1); }
 .action-btn--warn:hover { border-color: #ff6b6b; color: #ff6b6b; background: rgba(255, 107, 107, 0.1); }
-.action-btn--success:hover { border-color: #c8ff00; color: #c8ff00; background: rgba(200, 255, 0, 0.1); }
+.action-btn--success:hover { border-color: #4d8ef0; color: #4d8ef0; background: rgba(13, 57, 169, 0.18); }
 
 .empty-state {
     text-align: center;
@@ -1142,7 +1624,7 @@ onMounted(() => {
     font-size: 0.6rem;
     font-weight: 700;
     letter-spacing: 0.28em;
-    color: #c8ff00;
+    color: #4d8ef0;
     margin-bottom: 0.3rem;
 }
 
@@ -1199,7 +1681,7 @@ onMounted(() => {
 .dialog-btn-ghost:hover { border-color: rgba(255, 255, 255, 0.25); color: #f0ede6; }
 .dialog-btn-primary {
     padding: 0.65rem 1.6rem;
-    background: #c8ff00;
+    background: #4d8ef0;
     border: none;
     color: #0a0a0a;
     font-family: 'Barlow Condensed', sans-serif;
@@ -1301,8 +1783,91 @@ onMounted(() => {
 
 .radio-chip:hover { border-color: rgba(200, 255, 0, 0.2); color: #f0ede6; }
 .radio-chip--sel {
-    border-color: #c8ff00;
-    color: #c8ff00;
+    border-color: #4d8ef0;
+    color: #4d8ef0;
     background: rgba(200, 255, 0, 0.1);
 }
+
+.field-textarea {
+  resize: vertical;
+  padding: 0.7rem 0.85rem;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+.field-wrap--select { position: relative; }
+.select-caret {
+  position: absolute;
+  right: 0.5rem;
+  color: rgba(240, 237, 230, 0.25) !important;
+  font-size: 1rem !important;
+  pointer-events: none;
+}
+
+.field-date {
+  color-scheme: dark;
+}
+
+.cell-bold {
+  color: #f0ede6 !important;
+  font-weight: 500;
+}
+
+.dialog-btn-danger {
+  padding: 0.65rem 1.6rem;
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid rgba(255, 107, 107, 0.35);
+  color: #ff6b6b;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  clip-path: polygon(4% 0%, 100% 0%, 96% 100%, 0% 100%);
+}
+
+.dialog-btn-danger:hover:not(:disabled) {
+  background: rgba(255, 107, 107, 0.2);
+}
+
+.dialog-btn-danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.skel {
+  background: linear-gradient(90deg, rgba(77, 142, 240, 0.06) 25%, rgba(77, 142, 240, 0.12) 50%, rgba(77, 142, 240, 0.06) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {background-position: 200% 0;}
+  100% {background-position: -200% 0;}
+}
+.loading-dots {
+  display: flex; 
+  gap: 4px; 
+  align-items: center;
+}
+
+.loading-dots span {
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+  border-radius: 50%;
+  animation: dotBounce 0.9s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dotBounce { 0%, 80%, 100% { transform:scale(0.8); opacity: 0.5} 40% { transform:scale(1.2); opacity:1} }
 </style>
