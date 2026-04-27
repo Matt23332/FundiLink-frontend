@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../services/api'
 
+const router = useRouter()
 const services = ref([])
 const userRequests = ref([])
 const search = ref('')
@@ -69,6 +71,10 @@ const fetchRequests = async () => {
 const fetchUserRequests = async () => {
   await fetchRequests()
 }
+
+const featuredServices = computed(() => {
+  return services.value.slice(0, 3)
+})
 
 const filteredServices = computed(() =>
   services.value.filter(s =>
@@ -161,6 +167,10 @@ const getCurrentUser = async () => {
   } catch (err) {
     console.error('Error fetching current user: ', err.response?.status, err.response?.data)
   }
+}
+
+const goToServicePage = () => {
+  router.push('services')
 }
 
 onMounted(() => {
@@ -264,6 +274,13 @@ onMounted(() => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div v-if="!loading && services.length > 3" class="view-all-container">
+        <button class="view-all-btn" @click="goToServicePage">
+          <span>View All Services</span>
+        </button>
+        <p class="view-all-hint">{{ services.length - 9 }} more services {{ services.length - 9 !== 1 ? 's' : '' }} available</p>
       </div>
 
       <!-- SERVICE REQUEST SECTION -->
@@ -588,6 +605,53 @@ onMounted(() => {
   display: block;
   margin-bottom: 0.1rem;
   text-transform: uppercase;
+}
+
+.view-all-container {
+  text-align: center;
+  margin: 2rem 0 1rem;
+  padding: 1rem;
+}
+
+.view-all-btn {
+  background: transparent;
+  border: 2px solid #4d8ef0;
+  color: #4d8ef0;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.85rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  clip-path: polygon(4% 0%, 100% 0%, 96% 100%, 0% 100%);
+}
+
+.view-all-btn:hover {
+  background: #4d8ef0;
+  color: #060d1a;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(77, 142, 240, 0.3);
+}
+
+.view-all-btn .btn-icon {
+  font-size: 1.2rem !important;
+  transition: transform 0.3s ease;
+}
+
+.view-all-btn:hover .btn-icon {
+  transform: translateX(5px);
+}
+
+.view-all-hint {
+  font-size: 0.75rem;
+  color: rgba(240, 237, 230, 0.35);
+  margin-top: 0.75rem;
+  letter-spacing: 0.05em;
 }
 
 /* ── REQUEST BUTTON ── */

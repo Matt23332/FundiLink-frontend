@@ -14,7 +14,21 @@ const fetchServices = async () => {
   try {
     const { data } = await api.get('/services')
     console.log('API Response: ', data); // Testing
-    services.value = Array.isArray(data) ? data : (data.data ?? data.services ?? []);
+
+    let servicesArray = []
+    if (Array.isArray(data)) {
+      servicesArray = data    
+    } else if (data.data) {
+      servicesArray = Array.isArray(data.data) ? data.data : (data.data.services || [])
+    } else if (data.services) {
+      servicesArray = data.services
+    }
+    servicesArray = servicesArray.map(service => ({
+      ...service,
+      image: service.image || service.image_url || null
+    }))
+    
+    services.value = servicesArray
   } catch (err) {
     console.error('Fetch error: ', err.response?.status, err.response?.data);
   } finally {
@@ -83,8 +97,8 @@ onMounted(fetchServices)
           <div class="sp-bar"></div>
         </div>
         <div class="brand">
-          <span class="brand-icon">K</span>
-          <span class="brand-name">My<em>Services</em></span>
+          <span class="brand-icon">F</span>
+          <span class="brand-name">Fundi<em>Link</em></span>
         </div>
       </div>
 
@@ -135,6 +149,7 @@ onMounted(fetchServices)
             :src="service.image"
             :alt="service.name"
             class="card-img"
+            @error="handleImageError"
           />
           <div v-else class="card-img-placeholder">
             <v-icon icon="mdi-image-outline" class="placeholder-icon"></v-icon>
@@ -345,6 +360,11 @@ onMounted(fetchServices)
   height: 160px;
   object-fit: cover;
   display: block;
+  background: #0a1628;
+}
+
+.card-img[src=""] {
+  opacity: 0;
 }
 
 .card-img-placeholder {
@@ -568,3 +588,14 @@ onMounted(fetchServices)
   .brand { display: none; }
 }
 </style>
+
+<script>
+export default {
+  methods: {
+    handleImageError(event) {
+      event.target.style.display = 'none';
+      event.target.parentElement.querySelector('.card-img-placeholder')?.classList.remove('hidden');
+    }
+  }
+}
+</script>
