@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const errors = ref({});
 const serverError = ref('');
+const successMessage = ref('');
 
 const form = ref({
     firstName: '',
@@ -57,6 +58,7 @@ const handleSubmit = async () => {
     loading.value = true;
     errors.value = {};
     serverError.value = '';
+    successMessage.value = '';
 
     try {
       const payload = new FormData()
@@ -69,10 +71,13 @@ const handleSubmit = async () => {
       payload.append('address', form.value.address)
 
       const { data } = await api.post('/register', payload)
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
+      // localStorage.setItem('token', data.token) // Token is not stored immediately to ensure email verification first
+      // localStorage.setItem('user', JSON.stringify(data.user))
 
-      router.push('/login');
+      successMessage.value = 'Registration successful! Please check your email to verify your account.';
+      setTimeout(() => {
+        // router.push('/login'); // User is directed to check their email before login
+      }, 2000);
     } catch (err) {
       console.log(err.response.data)
       if (err.response?.status === 422) {
@@ -155,6 +160,7 @@ const prevStep = () => { if (step.value > 1) step.value-- }
                 </div>
 
                 <div v-if="serverError" class="server-error">{{ serverError }}</div>
+                <div v-if="successMessage" class="server-success">{{ successMessage }}</div>
                 <form @submit.prevent="handleSubmit">
 
                     <!--Step 1: Personal Information-->
@@ -816,4 +822,13 @@ const prevStep = () => { if (step.value > 1) step.value-- }
   transition: opacity 0.2s;
 }
 .login-link:hover { opacity: 0.75; }
+
+.server-success {
+  background: rgba(61, 207, 130, 0.1);
+  border: 1px solid rgba(61, 207, 130, 0.3);
+  color: #3ecf82;
+  padding: 0.75rem 1rem;
+  font-size: 0.82rem;
+  margin-bottom: 1rem;
+}
 </style>

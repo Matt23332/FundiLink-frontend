@@ -11,10 +11,15 @@ const password = ref('');
 const showPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref('');
+const unverified = ref(false);
+const resendLoading = ref(false);
+const resendMessage = ref('');
 
 const handleLogin = async () => {
     loading.value = true;
     errorMessage.value = '';
+    unverified.value = false;
+    resendMessage.value = '';
 
     try {
         const { data } = await api.post('/login', {
@@ -32,11 +37,27 @@ const handleLogin = async () => {
             errorMessage.value =  'Invalid email or password.';
         } else if (err.response?.status === 403) {
             errorMessage.value = 'Please verify your email before logging in.';
+            unverified.value = true;
         } else {
             errorMessage.value = err.response?.data?.message || 'Something went wrong.';
         }
     } finally {
         loading.value = false;
+    }
+}
+
+const resendEmailVerification = async () => {
+    resendLoading.value = true;
+    resendMessage.value = '';
+
+    try {
+        const data = await api.post('/email/resend', { email: email.value });
+        resendMessage.value = data.message;
+        unverified.value = false;
+    } catch {
+        resendMessage.value = 'Failed to resend verification email. Please try again later.';
+    } finally {
+        resendLoading.value = false;
     }
 }
 </script>
@@ -125,8 +146,13 @@ const handleLogin = async () => {
 
                     <div v-if="errorMessage" class="error-banner">
                         <v-icon icon="mdi-alert-cirlce-outline" class="error-icon"></v-icon>
-                        {{ errorMessage }}
+                        <span>{{ errorMessage }}</span>
+                        <button v-if="unverified" class="resend-btn" type="button" @click="resendEmailVerification" :disabled="resendLoading">
+                            {{ resendLoading ? 'Resending email...' : 'Resend verification email' }}
+                        </button>
                     </div>
+
+                    <div v-if="resendMessage" class="resend-success">{{ resendMessage }}</div>
 
                     <button type="submit" class="submit-btn" :class="{ 'submit-btn--loading': loading }">
                         <span v-if="!loading">LOGIN<span class="submit-arrow"> →</span></span>
@@ -444,20 +470,35 @@ const handleLogin = async () => {
  
 /* ── ERROR ── */
 .error-banner {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(255, 60, 60, 0.1);
-    border: 1px solid rgba(255, 60, 60, 0.3);
-    color: #ff6060;
-    padding: 0.75rem 1rem;
-    font-size: 0.82rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
 }
  
 .error-icon {
     color: #ff6060 !important;
     font-size: 1.1rem !important;
     flex-shrink: 0;
+}
+
+.resend-btn {
+    background: none;
+    border: 1px solid rgba(255, 96, 96, 0.4);
+    color: #ff6060;
+    font-size: 0.78rem;
+    padding: 0.35rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.resend-btn:hover:not(:disabled) { background: rgba(255, 96, 96, 0.08); }
+.resend-btn:disabled { opacity: 0.5; cursor: wait; }
+.resend-success {
+    background: rgba(61, 207, 130, 0.1);
+    border: 1px solid rgba(61, 207, 130, 0.3);
+    color: #3ecf82;
+    font-size: 0.82rem;
+    padding: 0.75rem 1rem;
 }
  
 /* ── SUBMIT ── */
