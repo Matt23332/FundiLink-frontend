@@ -10,6 +10,8 @@ import Profile from '@/components/Profile.vue'
 import SignUp from '@/components/SignUp.vue'
 import RequestService from '@/components/RequestService.vue'
 import ServiceProvider from '@/components/ServiceProvider.vue'
+import ForgotPassword from '@/components/ForgotPassword.vue'
+import ResetPassword from '@/components/ResetPassword.vue'
 
 const routes = [
   // Public routes
@@ -18,6 +20,8 @@ const routes = [
   { path: '/signUp', name: 'SignUp', component: SignUp },
 
   // Protected routes
+  { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword },
+  { path: '/reset-password', name: 'ResetPassword', component: ResetPassword },
   { path: '/profile', name: 'Profile', component: Profile },
   { path: '/homePage', name: 'HomePage', component: HomePage },
   { path: '/service-requests', name: 'ServiceRequests', component: ServiceRequests },
@@ -34,14 +38,12 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
+router.beforeEach((to, from) => {
   const auth = useAuthStore()
 
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     return { path: '/login' }
-  }
-
-  if ((to.path === '/login' || to.path === '/signUp') && auth.isLoggedIn) {
+  } else if ((to.path === '/login' || to.path === '/signUp') && auth.isLoggedIn) {
     return { path: '/homePage' }
   }
 })
