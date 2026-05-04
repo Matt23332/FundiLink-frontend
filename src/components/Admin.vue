@@ -1080,7 +1080,7 @@ onMounted(() => {
               <div class="field-wrap field-wrap--select">
                 <select v-model="requestStatus" class="field-input field-select">
                   <option value="" disabled>Select status</option>
-                  <option v-for="s in ['pending','active','completed','cancelled']" :key="s" :value="s">{{ s }}</option>
+                  <option v-for="s in ['Pending','Active','Completed','Cancelled']" :key="s" :value="s">{{ s }}</option>
                 </select>
                 <v-icon icon="mdi-chevron-down" class="select-caret"></v-icon>
               </div>
@@ -1126,7 +1126,7 @@ onMounted(() => {
               <label class="field-label">Status</label>
               <div class="field-wrap field-wrap--select">
                 <select v-model="requestStatus" class="field-input field-select">
-                  <option v-for="s in ['pending','active','completed','cancelled']" :key="s" :value="s">{{ s }}</option>
+                  <option v-for="s in ['Pending','Active','Completed','Cancelled']" :key="s" :value="s">{{ s }}</option>
                 </select>
                 <v-icon icon="mdi-chevron-down" class="select-caret"></v-icon>
               </div>
