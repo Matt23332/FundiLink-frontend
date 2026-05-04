@@ -3,8 +3,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const auth = useAuthStore();
 
 const email = ref('');
 const password = ref('');
@@ -141,7 +143,7 @@ const resendEmailVerification = async () => {
                             <input type="checkbox" class="remember-check" />
                             <span>Remember me</span>
                         </label>
-                        <a href="#" class="forgot-link">Forgot Password</a>
+                        <router-link to="/forgot-password" class="forgot-link">Forgot Password</router-link>
                     </div>
 
                     <div v-if="errorMessage" class="error-banner">

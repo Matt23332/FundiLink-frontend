@@ -1,41 +1,32 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import { storeToRefs } from 'pinia';
+import { computed, ref, onMounted } from 'vue';
 
+// Don't use storeToRefs at all — access store directly
 const auth = useAuthStore();
 
-const { user, isLoggedIn, userRole } = storeToRefs(auth); //to keep track of user reactivity and role changes
-const scrolled = ref(false);
+const isLoggedIn = computed(() => auth.isLoggedIn);
+const userRole = computed(() => auth.userRole);
+const user = computed(() => auth.user);
 
-const isCustomer = ref(false);
-const isAdmin = ref(false);
-const isProvider = ref(false);
+const isCustomer = computed(() => auth.userRole === 'Customer');
+const isAdmin = computed(() => auth.userRole === 'Admin');
+const isProvider = computed(() => auth.userRole === 'Provider');
+
+const scrolled = ref(false);
 const mobileMenuOpen = ref(false);
 
-// Watch for role changes
-watch(userRole, (newRole) => {
-    console.log('Role updated:', newRole);
-    isCustomer.value = newRole === 'Customer';
-    isAdmin.value = newRole === 'Admin';
-    isProvider.value = newRole === 'Provider';
-}, { immediate: true });
-
-const handleScroll = () => {
-    scrolled.value = window.scrollY > 50;
-};
-
-const toggleMobileMenu = () => {
-    mobileMenuOpen.value = !mobileMenuOpen.value;
-};
+const handleScroll = () => { scrolled.value = window.scrollY > 50; };
+const toggleMobileMenu = () => { mobileMenuOpen.value = !mobileMenuOpen.value; };
 
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
-    console.log('NavBar mounted - User:', user.value);
-    console.log('User role:', userRole.value);
-    console.log('Is logged in:', isLoggedIn.value);
+    console.log('NAV MOUNTED - isLoggedIn:', auth.isLoggedIn);
+    console.log('NAV MOUNTED - userRole:', auth.userRole);
+    console.log('NAV MOUNTED - user:', auth.user);
 });
 
+import { onUnmounted } from 'vue';
 onUnmounted(() => window.removeEventListener('scroll', handleScroll));
 </script>
 
@@ -106,9 +97,9 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll));
                                 <div class="user-info">
                                     <span class="user-name">{{ user?.name?.split(' ')[0] || 'User' }}</span>
                                     <span class="user-role-badge" :class="{
-                                        'role-admin': userRole === 'Admin',
-                                        'role-provider': userRole === 'Provider',
-                                        'role-customer': userRole === 'Customer'
+                                        'role-admin': isAdmin,
+                                        'role-provider': isProvider,
+                                        'role-customer': isCustomer
                                     }">
                                         {{ userRole || 'Role' }}
                                     </span>
@@ -394,7 +385,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll));
 }
 
 .nav-btn--primary:hover {
-    background: #d9ff33 !important;
+    background: #3b6fd1 !important;
     transform: translateY(-1px);
 }
 

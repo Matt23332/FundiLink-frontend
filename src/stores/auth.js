@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, nextTick } from 'vue';
 import api from '../services/api';
 import router from '../router';
 
 export const useAuthStore = defineStore('auth', () => {
     const token = ref(localStorage.getItem('token') ?? null)
     const user = ref(JSON.parse(localStorage.getItem('user')) ?? null)
+
+    console.log('Store init - user from localStorage:', user.value)
+    console.log('Store init - role:', user.value?.role)
 
     const isLoggedIn = computed(() => !!token.value)
     const userRole = computed(() => {
@@ -27,8 +30,9 @@ export const useAuthStore = defineStore('auth', () => {
 
                 localStorage.setItem('token', response.data.token)
                 localStorage.setItem('user', JSON.stringify(response.data.user))
-                console.log('Login successful. User role: ', user.value.role)
+                console.log('Login successful. User role: ', user.value.role) // debugging
 
+                await nextTick()
                 await router.push('/homePage')
                 return true
             }
