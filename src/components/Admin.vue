@@ -84,7 +84,7 @@ const stats = computed(() => [
 
 // ── COLOR MAPS ──
 const roleColors = { Admin: '#ff6b6b', Customer: '#4d8ef0', Provider: '#27ae60' };
-const statusColors = { pending: '#f39c12', active: '#4d8ef0', completed: '#27ae60', cancelled: '#e74c3c' };
+const statusColors = { Pending: '#f39c12', Active: '#4d8ef0', Completed: '#27ae60', Cancelled: '#e74c3c' };
 
 // ── FETCH ──
 async function fetchUsers() {
